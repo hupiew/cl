@@ -1,0 +1,40 @@
+---
+BasedOnStyle: Mozilla
+AccessModifierOffset: '-4'
+AllowAllArgumentsOnNextLine: 'true'
+AllowAllParametersOfDeclarationOnNextLine: 'true'
+AllowShortCaseLabelsOnASingleLine: 'true'
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: Always
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: 'true'
+AlwaysBreakAfterDefinitionReturnType: None
+AlwaysBreakAfterReturnType: None
+BraceWrapping:
+  AfterCaseLabel: 'true'
+  AfterClass: 'true'
+  AfterControlStatement: 'true'
+  AfterEnum: 'true'
+  AfterFunction: 'true'
+  AfterNamespace: 'false'
+  AfterObjCDeclaration: 'false'
+  AfterStruct: 'true'
+  AfterUnion: 'true'
+  AfterExternBlock: 'true'
+  BeforeCatch: 'true'
+  BeforeElse: 'true'
+  IndentBraces: 'false'
+  SplitEmptyFunction: 'false'
+  SplitEmptyRecord: 'false'
+  SplitEmptyNamespace: 'false'
+BreakBeforeBraces: Custom
+ColumnLimit: '88'
+ContinuationIndentWidth: '4'
+FixNamespaceComments: 'true'
+IndentWidth: '4'
+MaxEmptyLinesToKeep: '3'
+KeepEmptyLinesAtTheStartOfBlocks: 'false'
+PointerAlignment: Left
+Standard: Cpp11
+
+...
