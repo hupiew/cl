@@ -3,5 +3,6 @@ CL, Originally standing for ColorLayout, is a small console app, to hash images 
 
 # Usage
 Example:
->>> cl -d fcth ae.jpg
-ae.png: DsCAAIaAgIKAQICAooCAoICAgICAgICApICAwISAgIKAoICAgICAgICAgICAgICAhoCAoICAgICAoA==
+>\>\>\> cl -d fcth ae.jpg
+>
+> ae.png: DsCAAIaAgIKAQICAooCAoICAgICAgICApICAwISAgIKAoICAgICAgICAgICAgICAhoCAoICAgICAoA==
