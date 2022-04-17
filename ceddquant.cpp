@@ -26,6 +26,8 @@
 
 #include <ceddquant.h>
 
+#include <cstdlib>
+
 
 namespace {
 

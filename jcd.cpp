@@ -74,7 +74,7 @@ std::vector<int8_t> JCD::get_descriptor() const noexcept
     int8_t tmpVal = 0;
 
     auto result = std::vector<int8_t>(data.size());
-    for (int i = 0; i < data.size(); i++)
+    for (auto i = 0u; i < data.size(); i++)
     {
         if (data[i] > 0)
         {

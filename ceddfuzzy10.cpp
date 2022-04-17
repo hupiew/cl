@@ -27,6 +27,35 @@
 #include <ceddfuzzy10.h>
 
 
+namespace {
+
+constexpr uint16_t hueMembershipValues[32]{ 0,   0,   5,   10,  5,   10,  35,  50,
+                                            35,  50,  70,  85,  70,  85,  150, 165,
+                                            150, 165, 195, 205, 195, 205, 265, 280,
+                                            265, 280, 315, 330, 315, 330, 360, 360 };
+
+constexpr uint16_t saturationMembershipValues[8]{ 0, 0, 10, 75, 10, 75, 255, 255 };
+
+constexpr uint16_t valueMembershipValues[12]{ 0,   0,   10,  75,  10,  75,
+                                              180, 220, 180, 220, 255, 255 };
+
+constexpr int rules_length = 48;
+constexpr FuzzyRules Fuzzy10BinRules[rules_length] = {
+    { 0, 0, 0, 2 }, { 0, 1, 0, 2 }, { 0, 0, 2, 0 }, { 0, 0, 1, 1 }, { 1, 0, 0, 2 },
+    { 1, 1, 0, 2 }, { 1, 0, 2, 0 }, { 1, 0, 1, 1 }, { 2, 0, 0, 2 }, { 2, 1, 0, 2 },
+    { 2, 0, 2, 0 }, { 2, 0, 1, 1 }, { 3, 0, 0, 2 }, { 3, 1, 0, 2 }, { 3, 0, 2, 0 },
+    { 3, 0, 1, 1 }, { 4, 0, 0, 2 }, { 4, 1, 0, 2 }, { 4, 0, 2, 0 }, { 4, 0, 1, 1 },
+    { 5, 0, 0, 2 }, { 5, 1, 0, 2 }, { 5, 0, 2, 0 }, { 5, 0, 1, 1 }, { 6, 0, 0, 2 },
+    { 6, 1, 0, 2 }, { 6, 0, 2, 0 }, { 6, 0, 1, 1 }, { 7, 0, 0, 2 }, { 7, 1, 0, 2 },
+    { 7, 0, 2, 0 }, { 7, 0, 1, 1 }, { 0, 1, 1, 3 }, { 0, 1, 2, 3 }, { 1, 1, 1, 4 },
+    { 1, 1, 2, 4 }, { 2, 1, 1, 5 }, { 2, 1, 2, 5 }, { 3, 1, 1, 6 }, { 3, 1, 2, 6 },
+    { 4, 1, 1, 7 }, { 4, 1, 2, 7 }, { 5, 1, 1, 8 }, { 5, 1, 2, 8 }, { 6, 1, 1, 9 },
+    { 6, 1, 2, 9 }, { 7, 1, 1, 3 }, { 7, 1, 2, 3 }
+};
+
+} // namespace
+
+
 CeddFuzzy10::CeddFuzzy10(bool keep_values)
     : keep_values(keep_values) {}
 
@@ -43,7 +72,8 @@ std::vector<double> CeddFuzzy10::apply_filter(double hue,
     std::vector<double> valueActivation(8);
 
     findMembershipValueForTriangles(hue, hueMembershipValues, 32, &hueActivation);
-    findMembershipValueForTriangles(saturation, saturationMembershipValues, 8, &saturationActivation);
+    findMembershipValueForTriangles(
+        saturation, saturationMembershipValues, 8, &saturationActivation);
     findMembershipValueForTriangles(value, valueMembershipValues, 12, &valueActivation);
 
     if (method == 0)

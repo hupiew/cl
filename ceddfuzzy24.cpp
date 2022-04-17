@@ -27,8 +27,20 @@
 #include <ceddfuzzy24.h>
 
 
-std::vector<double> CeddFuzzy24::ApplyFilter(double Hue,
-                                             double Saturation,
+namespace {
+
+constexpr std::array<double, 8> SaturationMembershipValues = { 0,  0,   68,  188,
+                                                               68, 188, 255, 255 };
+constexpr std::array<double, 8> ValueMembershipValues = { 0,  0,   68,  188,
+                                                          68, 188, 255, 255 };
+constexpr int rules_length = 4;
+constexpr FuzzyRules Fuzzy24BinRules[rules_length] = {
+    { 1, 1, 1, 0 }, { 0, 0, 2, 0 }, { 0, 1, 0, 0 }, { 1, 0, 2, 0 }
+};
+
+} // namespace
+
+std::vector<double> CeddFuzzy24::ApplyFilter(double Saturation,
                                              double Value,
                                              const std::vector<double>& ColorValues,
                                              int Method)
@@ -85,7 +97,7 @@ void CeddFuzzy24::FindMembershipValueForTriangles(const double Input,
 {
     int Temp = 0;
 
-    for (int i = 0; i <= Triangles.size() - 1; i += 4)
+    for (auto i = 0u; i <= Triangles.size() - 1; i += 4)
     {
         (*save_to)[Temp] = 0;
 

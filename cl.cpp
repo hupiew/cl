@@ -142,7 +142,7 @@ void ColorLayoutExtractor::extract(const QImage& image) noexcept
     coeffs[1][0] = static_cast<uint8_t>(quant_cdc(shapes[1][0] >> 3));
     coeffs[2][0] = static_cast<uint8_t>(quant_cdc(shapes[2][0] >> 3));
 
-    for (int i = 1; i < coeffs[0].size(); ++i)
+    for (auto i = 1u; i < coeffs[0].size(); ++i)
     {
         coeffs[0][i] = static_cast<uint8_t>(quant_ac((shapes[0][(arrayZigZag[i])]) >> 1) >> 3);
         coeffs[1][i] = static_cast<uint8_t>(quant_ac(shapes[1][(arrayZigZag[i])]) >> 3);

@@ -26,6 +26,10 @@
 
 #include <fcth.h>
 
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+
 // The CEDD fuzzy code is identical to the FCTH code.
 #include <cedd.h>
 #include <ceddfuzzy10.h>
@@ -156,7 +160,7 @@ void FCTH::extract(const QImage &image)
 
             const QColor col = { MeanRed, MeanGreen, MeanBlue };
             // Qt returns a hue value of -1 for achromatic colors, not what we want.
-            const auto hue = std::max(0.0f, col.hsvHueF() * 359);
+            const auto hue = std::max(0.0f, static_cast<float>(col.hsvHueF() * 359));
             const auto sat = col.hsvSaturationF() * 255;
             const auto val = col.valueF() * 255;
 
@@ -165,7 +169,7 @@ void FCTH::extract(const QImage &image)
                 auto Fuzzy10BinResultTable =
                     Fuzzy10.apply_filter(hue, sat, val, Method);
                 auto Fuzzy24BinResultTable =
-                    Fuzzy24.ApplyFilter(hue, sat, val, Fuzzy10BinResultTable, Method);
+                    Fuzzy24.ApplyFilter(sat, val, Fuzzy10BinResultTable, Method);
                 fuzzFcth.apply_filter(
                     Matrix, Fuzzy24BinResultTable, Method, &histogram);
                 // possible problem
@@ -182,7 +186,7 @@ void FCTH::extract(const QImage &image)
 
     const double sum = std::accumulate(histogram.cbegin(), histogram.cend(), 0.0);
 
-    for (int i = 0; i < histogram.size(); i++)
+    for (auto i = 0u; i < histogram.size(); i++)
     {
         histogram[i] = histogram[i] / sum;
     }
@@ -193,7 +197,7 @@ void FCTH::extract(const QImage &image)
 std::vector<int8_t> FCTH::get_descriptor() const noexcept
 {
     int position = -1;
-    for (int i = 0; i < histogram.size(); i++)
+    for (auto i = 0u; i < histogram.size(); i++)
     {
         if (position == -1)
         {
@@ -204,12 +208,12 @@ std::vector<int8_t> FCTH::get_descriptor() const noexcept
             if (histogram[i] != 0) position = -1;
         }
     }
-    if (position < 0) position = histogram.size() - 1;
+    if (position < 0) position = static_cast<int>(histogram.size() - 1);
     // find out the actual length. two values in one byte, so we have to round up.
     int length = (position + 1) / 2;
     if ((position + 1) % 2 == 1) length = position / 2 + 1;
     std::vector<int8_t> result(length);
-    for (int i = 0; i < result.size(); i++)
+    for (auto i = 0u; i < result.size(); i++)
     {
         int tmp = (static_cast<int>(histogram[(i << 1)] * 2)) << 4;
         tmp = (tmp | ((int)(histogram[(i << 1) + 1] * 2)));

@@ -65,7 +65,7 @@ void FuzzyFcth::apply_filter(const WaveletMatrixPlus& matrix,
     {
         if (resultsTable[i] > 0)
         {
-            for (int j = 0; j < colors.size(); j++)
+            for (auto j = 0u; j < colors.size(); j++)
             {
                 if (colors[j] > 0)
                     (*output)[colors.size() * i + j] += resultsTable[i] * colors[j];

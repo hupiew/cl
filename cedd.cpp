@@ -26,7 +26,10 @@
 
 #include <cedd.h>
 
+#include <algorithm>
 #include <array>
+#include <cmath>
+#include <cstdlib>
 #include <iostream>
 
 #include <ceddfuzzy10.h>
@@ -208,14 +211,14 @@ void CEDD::extract(const QImage& image)
 
             const QColor col = { MeanRed, MeanGreen, MeanBlue };
             // Qt returns a hue value of -1 for achromatic colors, not what we want.
-            const auto hue = static_cast<int>(std::max(0.0f, col.hsvHueF() * 359));
+            const auto hue = std::max(0, static_cast<int>(col.hsvHueF() * 359));
             const auto sat = static_cast<int>(col.hsvSaturationF() * 256);
             const auto val = static_cast<int>(col.valueF() * 256);
 
             if (!this->compact)
             {
                 auto fuzzy10 = Fuzzy10.apply_filter(hue, sat, val, 2);
-                auto fuzzy24 = Fuzzy24.ApplyFilter(hue, sat, val, fuzzy10, 2);
+                auto fuzzy24 = Fuzzy24.ApplyFilter(sat, val, fuzzy10, 2);
 
                 for (int i = 0; i <= T; i++)
                 {
@@ -259,7 +262,7 @@ void CEDD::extract(const QImage& image)
         qCEDD = CompactCEDDQuant::apply(CEDD);
     }
 
-    for (int i = 0; i < qCEDD.size(); i++)
+    for (auto i = 0u; i < qCEDD.size(); i++)
     {
         histogram[i] = static_cast<int8_t>(qCEDD[i]);
     }
@@ -268,7 +271,7 @@ void CEDD::extract(const QImage& image)
 std::vector<int8_t> CEDD::get_descriptor()
 {
     int position = -1;
-    for (int i = 0; i < histogram.size(); i++)
+    for (auto i = 0u; i < histogram.size(); i++)
     {
         if (position == -1)
         {
@@ -284,7 +287,7 @@ std::vector<int8_t> CEDD::get_descriptor()
     int length = (position + 1) / 2;
     if ((position + 1) % 2 == 1) length = position / 2 + 1;
     std::vector<int8_t> result(length);
-    for (int i = 0; i < result.size(); i++)
+    for (auto i = 0u; i < result.size(); i++)
     {
         int tmp = (histogram[(i << 1)]) << 4;
         tmp = (tmp | (histogram[(i << 1) + 1]));

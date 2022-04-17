@@ -27,6 +27,7 @@
 #include <compactceddquant.h>
 
 #include <array>
+#include <cmath>
 
 namespace {
 

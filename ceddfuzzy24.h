@@ -26,24 +26,12 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include <ceddfuzzy10.h>
 
 class CeddFuzzy24
 {
-    static constexpr std::array<double, 8> SaturationMembershipValues =
-        {0, 0, 68, 188, 68, 188, 255, 255};
-    static constexpr std::array<double, 8> ValueMembershipValues =
-        {0, 0, 68, 188, 68, 188, 255, 255};
-
-    static constexpr int rules_length = 4;
-    static constexpr FuzzyRules Fuzzy24BinRules[rules_length] =
-    {
-        {1, 1, 1},
-        {0, 0, 2},
-        {0, 1, 0},
-        {1, 0, 2}
-    };
-
     std::array<double, 3> resultsTable;
     std::array<double, 24> fuzzy24BinHisto;
     bool keep_values = false;
@@ -60,8 +48,7 @@ class CeddFuzzy24
 public:
     CeddFuzzy24(bool keep_values);
 
-    std::vector<double> ApplyFilter(double Hue,
-                                    double Saturation,
+    std::vector<double> ApplyFilter(double Saturation,
                                     double Value,
                                     const std::vector<double>& ColorValues,
                                     int Method);
