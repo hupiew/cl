@@ -1,7 +1,9 @@
-QT += core gui
+QT += core gui multimedia
 
 CONFIG += c++2a console
 CONFIG -= app_bundle
+
+INCLUDEPATH += $$PWD/flatbuffers/include
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -14,11 +16,15 @@ SOURCES += \
         ceddquant.cpp \
         cl.cpp \
         compactceddquant.cpp \
+        extractor.cpp \
         fcth.cpp \
         fcthquant.cpp \
         fuzzyfcth.cpp \
         jcd.cpp \
-        main.cpp
+        main.cpp \
+        util/BytesView.cpp \
+        util/IscFileHelper.cpp \
+        videoextractor.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -32,7 +38,11 @@ HEADERS += \
     ceddquant.h \
     cl.h \
     compactceddquant.h \
+    extractor.h \
     fcth.h \
     fcthquant.h \
     fuzzyfcth.h \
-    jcd.h
+    jcd.h \
+    util/BytesView.hpp \
+    util/IscFileHelper.hpp \
+    videoextractor.h

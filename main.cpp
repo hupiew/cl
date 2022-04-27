@@ -1,14 +1,5 @@
 // main.cpp
 /* CL
-   This file was originally written in Java as part of LIRE,
-   and was adapted into C++ by Hupie.
-
-   Copyright (C) 2002-2013 Mathias Lux (mathias@juggle.at)
-     http://www.semanticmetadata.net/lire, http://www.lire-project.net
-       Mathias Lux, Oge Marques. Visual Information Retrieval using Java and LIRE
-       Morgan & Claypool, 2013
-       URL: http://www.morganclaypool.com/doi/abs/10.2200/S00468ED1V01Y201301ICR025
-
    Copyright (C) 2022  Hupie (hupiew[at]gmail.com)
 
    This program is free software: you can redistribute it and/or modify
@@ -25,31 +16,40 @@
    along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 
 #include <iostream>
+#include <memory>
 
+#include <QByteArray>
 #include <QCommandLineParser>
 #include <QCoreApplication>
-#include <QByteArray>
+#include <QEventLoop>
+#include <QFile>
 #include <QImage>
 #include <QImageReader>
+#include <QMimeDatabase>
 
 #include <cedd.h>
 #include <cl.h>
+#include <extractor.h>
 #include <fcth.h>
 #include <jcd.h>
+#include <util/IscFileHelper.hpp>
+#include <videoextractor.h>
 
 
 int main(int argc, char *argv[])
 {
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("cl");
-    QCoreApplication::setApplicationVersion("1.0");
+    QCoreApplication::setApplicationVersion("1.1");
 
     QCommandLineParser parser;
     parser.setApplicationDescription("Extract image descriptors.");
     parser.addHelpOption();
     parser.addVersionOption();
 
-    parser.addPositionalArgument("images", QCoreApplication::translate("main", "Images to process."));
+    parser.addPositionalArgument(
+        "images/videos",
+        QCoreApplication::translate("main", "Images or video to process."));
     QCommandLineOption hasherOption(
         QStringList() << "d"
                       << "hasher",
@@ -57,60 +57,134 @@ int main(int argc, char *argv[])
             "main", "Which image descriptor to use. cl, cedd, fcth or jcd"),
         "hasher",
         "cl");
+    QCommandLineOption nameOption(
+        QStringList() << "n"
+                      << "name",
+        QCoreApplication::translate(
+            "main", "Name field of the Isc File, default is empty string."),
+        "name",
+        "");
+    QCommandLineOption titleOption(
+        QStringList() << "no-title",
+        QCoreApplication::translate(
+            "main", "Don't use input files as titles in the Isc Index."));
+    QCommandLineOption makeIscOption(
+        QStringList() << "isc"
+                      << "Produce an Isc file to be loaded by ImSearch.");
     parser.addOption(hasherOption);
+    parser.addOption(nameOption);
+    parser.addOption(titleOption);
+    parser.addOption(makeIscOption);
 
     parser.process(app);
     const QString hasher = parser.value(hasherOption).toLower();
     const QStringList args = parser.positionalArguments();
 
+    // Set-up isc
+    imsearch::IscFileHelper isc{};
+    isc.set_name(parser.value(nameOption).toStdString());
+    const bool make_isc = parser.isSet(makeIscOption);
+    const bool no_title = parser.isSet(titleOption);
+
+    std::unique_ptr<Extractor> extractor;
+    uint8_t type = 255;
+    if (hasher == "cl")
+    {
+        extractor = std::make_unique<ColorLayoutExtractor>();
+        type = 2;
+    }
+    else if (hasher == "cedd")
+    {
+        extractor = std::make_unique<CEDD>();
+        type = 4;
+    }
+    else if (hasher == "fcth")
+    {
+        extractor = std::make_unique<FCTH>();
+        type = 5;
+    }
+    else if (hasher == "jcd")
+    {
+        extractor = std::make_unique<JCD>();
+        type = 6;
+    }
+    else
+    {
+        std::cerr << "Unsupported hasher." << '\n';
+        std::terminate();
+    }
     for (const auto& item: args)
     {
-        const char format = QImage::Format_RGB32;
-        const auto im = QImage(item, &format);
-        if (im.isNull())
+        QMimeDatabase db;
+        auto mime = db.mimeTypeForFile(item).name();
+
+        if (mime.startsWith("video"))
         {
-            std::cout << "Can't load image: " << item.toStdString() << '\n';
+            if (!make_isc)
+            {
+                std::cerr << "Video hashing only works with the --isc option" << '\n';
+                std::terminate();
+            }
+            auto cl = VideoExtractor();
+            cl.set_extractor(std::move(extractor));
+            const auto url = QUrl::fromLocalFile(item);
+            {
+                QEventLoop loop;
+                QObject::connect(
+                    &cl, &VideoExtractor::processingDone, &loop, &QEventLoop::quit);
+                cl.load_video(url);
+                loop.exec();
+            }
+            extractor = cl.get_extractor();
+            isc.add_index(cl.get_data(!no_title));
             continue;
         }
-        std::vector<int8_t> des;
-        if (hasher == "cl")
+        else if (mime.startsWith("image"))
         {
-            auto cl = ColorLayoutExtractor();
-            cl.extract(im);
-            des = cl.get_descriptor(21, 6);
+            const char format = QImage::Format_RGB32;
+            const auto im = QImage(item, &format);
+            if (im.isNull())
+            {
+                std::cout << "Can't load image: " << item.toStdString() << '\n';
+                continue;
+            }
+            extractor->extract(im);
         }
-        else if (hasher == "cedd")
+        auto des = extractor->get_descriptor();
+
+        if (make_isc)
         {
-            auto cl = CEDD();
-            cl.extract(im);
-            des = cl.get_descriptor();
-        }
-        else if (hasher == "fcth")
-        {
-            auto cl = FCTH();
-            cl.extract(im);
-            des = cl.get_descriptor();
-        }
-        else if (hasher == "jcd")
-        {
-            auto cl = JCD();
-            cl.extract(im);
-            des = cl.get_descriptor();
+            imsearch::IscIndexHelper isc_index{};
+            isc_index.add_hashdata(imsearch::BytesView(des));
+            // isc_index.add_imageindex({0, 0}); // Not needed I think.
+            // isc_index.add_timeindex({}); // Not needed I think.
+            isc_index.set_length(1);
+            isc_index.set_type(type);
+            if (!no_title) isc_index.add_title(item.toStdString(), 0);
+            isc.add_index(isc_index);
         }
         else
         {
-            std::cout << "Unsupported hasher." << '\n';
-            std::terminate();
+            auto ar = QByteArray(reinterpret_cast<char*>(des.data()), des.size());
+
+            auto j = ar.toBase64(QByteArray::Base64Encoding);
+
+            auto s = std::string(j.data(), j.size());
+
+            std::cout << item.toStdString() << ": " << s << '\n';
         }
-
-
-        auto ar = QByteArray(reinterpret_cast<char*>(des.data()), des.size());
-
-        auto j = ar.toBase64(QByteArray::Base64Encoding);
-
-        auto s = std::string(j.data(), j.size());
-
-        std::cout << item.toStdString() << ": " << s << '\n';
+    }
+    if (make_isc)
+    {
+        const auto data = isc.to_file();
+        const auto bytes =
+            QByteArray(reinterpret_cast<const char*>(data.data()), data.size());
+        auto file = QFile{ "output.isc" };
+        if (file.open(QIODevice::ReadWrite))
+        {
+            QDataStream stream(&file);
+            stream << bytes;
+        }
     }
     //return a.exec();
 }
