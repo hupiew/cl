@@ -68,7 +68,7 @@ void JCD::extract(const QImage& image)
     joinHistograms(cedd, fcth);
 }
 
-std::vector<int8_t> JCD::get_descriptor() const noexcept
+std::vector<int8_t> JCD::get_descriptor() const
 {
     int len = 0;
     int8_t tmpVal = 0;

@@ -31,11 +31,12 @@
 #include <QImage>
 
 #include <cedd.h>
+#include <extractor.h>
 #include <fcth.h>
 
 
 
-class JCD
+class JCD : public Extractor
 {
     std::array<double, 168> data;
 
@@ -46,7 +47,7 @@ public:
 
     JCD();
 
-    void extract(const QImage& image);
+    virtual void extract(const QImage& image) override;
 
-    std::vector<int8_t> get_descriptor() const noexcept;
+    [[nodiscard]] virtual std::vector<int8_t> get_descriptor() const override;
 };

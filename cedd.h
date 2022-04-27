@@ -30,6 +30,8 @@
 
 #include <QImage>
 
+#include <extractor.h>
+
 
 struct Neighborhood
 {
@@ -53,7 +55,7 @@ struct MaskResults
     double Mask5;
 };
 
-class CEDD
+class CEDD : public Extractor
 {
     static constexpr float T0 = 14.0f;
     static constexpr float T1 = 0.68f;
@@ -66,10 +68,9 @@ class CEDD
 public:
     CEDD();
 
+    virtual void extract(const QImage& image) override;
 
-    void extract(const QImage& image);
-
-    std::vector<int8_t> get_descriptor();
+    virtual std::vector<int8_t> get_descriptor() const override;
 
     const std::array<int8_t, 144>& get_data() const noexcept;
 

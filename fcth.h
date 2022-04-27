@@ -28,7 +28,10 @@
 
 #include <array>
 
-#include <qimage.h>
+#include <QImage>
+
+#include <extractor.h>
+
 
 struct WaveletMatrixPlus
 {
@@ -38,7 +41,7 @@ struct WaveletMatrixPlus
     double Entropy;
 };
 
-class FCTH
+class FCTH : public Extractor
 {
     std::array<double, 192> histogram;
     bool compact;
@@ -49,9 +52,9 @@ class FCTH
 public:
     FCTH();
 
-    void extract(const QImage& image);
+    virtual void extract(const QImage& image) override;
 
-    std::vector<int8_t> get_descriptor() const noexcept;
+    [[nodiscard]] virtual std::vector<int8_t> get_descriptor() const override;
 
     const std::array<double, 192>& get_data() const noexcept;
 };

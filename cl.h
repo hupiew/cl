@@ -31,11 +31,15 @@
 
 #include <QImage>
 
+#include <extractor.h>
 
-class ColorLayoutExtractor
+
+class ColorLayoutExtractor : public Extractor
 {
     std::array<std::array<int, 64>, 3> shapes;
     std::array<std::array<uint8_t, 64>, 3> coeffs;
+    unsigned int ycoeff_length{ 21 };
+    unsigned int ccoeff_length{ 6 };
 
     static int quant_ac (int i) noexcept;
     static int quant_cdc(int i) noexcept;
@@ -44,12 +48,14 @@ class ColorLayoutExtractor
     void fdct(std::array<int, 64> &shape) noexcept;
     void extract_shape(const QImage &image) noexcept;
 
-
-
 public:
     ColorLayoutExtractor();
 
-    void extract(const QImage& image) noexcept;
+    virtual void extract(const QImage& image) noexcept override;
 
-    [[nodiscard]] std::vector<int8_t> get_descriptor(unsigned int ycoeffs, unsigned int ccoeffs) const;
+    [[nodiscard]] virtual std::vector<int8_t> get_descriptor() const override;
+
+    virtual bool is_variable() const noexcept override { return false; }
+
+    void set_coeffs(unsigned int ycoeffs, unsigned int ccoeffs);
 };

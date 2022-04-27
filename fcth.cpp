@@ -194,7 +194,7 @@ void FCTH::extract(const QImage &image)
     histogram = FcthQuant::apply(histogram);
 }
 
-std::vector<int8_t> FCTH::get_descriptor() const noexcept
+std::vector<int8_t> FCTH::get_descriptor() const
 {
     int position = -1;
     for (auto i = 0u; i < histogram.size(); i++)

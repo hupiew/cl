@@ -39,7 +39,6 @@
 
 CEDD::CEDD() : compact(false)
 {
-
 }
 
 void CEDD::extract(const QImage& image)
@@ -86,8 +85,6 @@ void CEDD::extract(const QImage& image)
     }
 
 // to here
-
-    CEDD.fill(0.0);
 
     for (int y = 0; y < height; y++)
     {
@@ -268,7 +265,7 @@ void CEDD::extract(const QImage& image)
     }
 }
 
-std::vector<int8_t> CEDD::get_descriptor()
+std::vector<int8_t> CEDD::get_descriptor() const
 {
     int position = -1;
     for (auto i = 0u; i < histogram.size(); i++)

@@ -151,20 +151,26 @@ void ColorLayoutExtractor::extract(const QImage& image) noexcept
 
 }
 
-std::vector<int8_t> ColorLayoutExtractor::get_descriptor(unsigned int ycoeffs, unsigned int ccoeffs) const
+std::vector<int8_t> ColorLayoutExtractor::get_descriptor() const
 {
-    if (64 < ycoeffs || ycoeffs == 0 ||
-        64 < ccoeffs || ccoeffs == 0)
-        throw std::runtime_error("ycoeff and ccoeff need to be positive non-zero numbers less-than or equal to 64");
     std::vector<int8_t> desc{};
 
-    desc.reserve(ycoeffs + ccoeffs * 2);
+    desc.reserve(ycoeff_length + ccoeff_length * 2);
 
-    std::copy_n(coeffs[0].begin(), ycoeffs, std::back_inserter(desc));
-    std::copy_n(coeffs[1].begin(), ccoeffs, std::back_inserter(desc));
-    std::copy_n(coeffs[2].begin(), ccoeffs, std::back_inserter(desc));
+    std::copy_n(coeffs[0].begin(), ycoeff_length, std::back_inserter(desc));
+    std::copy_n(coeffs[1].begin(), ccoeff_length, std::back_inserter(desc));
+    std::copy_n(coeffs[2].begin(), ccoeff_length, std::back_inserter(desc));
 
     return desc;
+}
+
+void ColorLayoutExtractor::set_coeffs(unsigned int ycoeffs, unsigned int ccoeffs)
+{
+    if (64 < ycoeffs || ycoeffs == 0 || 64 < ccoeffs || ccoeffs == 0)
+        throw std::runtime_error("ycoeff and ccoeff need to be positive non-zero "
+                                 "numbers less-than or equal to 64");
+    ycoeff_length = ycoeffs;
+    ccoeff_length = ccoeffs;
 }
 
 int ColorLayoutExtractor::quant_ac(int i) noexcept
