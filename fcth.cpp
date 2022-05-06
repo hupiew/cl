@@ -117,16 +117,15 @@ void FCTH::extract(const QImage &image)
             {
                 for (int j = 0; j < Step_Y; j++)
                 {
-                    int CurrentPixelX = 0;
-                    int CurrentPixelY = 0;
+                    int CurrentPixelX = 3;
+                    int CurrentPixelY = 3;
+                    CurrentPixelX -= (i < (Step_X / 4));
+                    CurrentPixelX -= (i < (Step_X / 2));
+                    CurrentPixelX -= (i < (3 * Step_X / 4));
 
-                    if (i >= (Step_X / 4)) CurrentPixelX = 1;
-                    if (i >= (Step_X / 2)) CurrentPixelX = 2;
-                    if (i >= (3 * Step_X / 4)) CurrentPixelX = 3;
-
-                    if (j >= (Step_Y / 4)) CurrentPixelY = 1;
-                    if (j >= (Step_Y / 2)) CurrentPixelY = 2;
-                    if (j >= (3 * Step_Y / 4)) CurrentPixelY = 3;
+                    CurrentPixelY -= (j < (Step_Y / 4));
+                    CurrentPixelY -= (j < (Step_Y / 2));
+                    CurrentPixelY -= (j < (3 * Step_Y / 4));
 
                     const auto index = CEDD::index_2d_arrayC(x + i, y + j, width);
                     const auto block_index =
