@@ -37,29 +37,19 @@
 #include <ceddquant.h>
 #include <compactceddquant.h>
 
+
 CEDD::CEDD() : compact(false)
 {
 }
 
 void CEDD::extract(const QImage& image)
 {
-    if (image.format() != QImage::Format_RGB32)
-    {
-        std::cout << "image format not correct" << '\n';
-    }
-
     std::array<double, 144> CEDD{};
 
     const int width = image.width();
     const int height = image.height();
 
-    auto ImageGrid = std::vector<double>(height * width);
-    auto ImageGridRed = std::vector<int>(height * width);
-    auto ImageGridGreen = std::vector<int>(height * width);
-    auto ImageGridBlue = std::vector<int>(height * width);
-
-
-//please double check from here
+    // please double check from here
     int NumberOfBlocks = -1;
 
     if (std::min(width, height) >= 80) NumberOfBlocks = 1600;
@@ -84,30 +74,6 @@ void CEDD::extract(const QImage& image)
         }
     }
 
-// to here
-
-    for (int y = 0; y < height; y++)
-    {
-        const QRgb* line = reinterpret_cast<const QRgb*>(image.scanLine(y));
-        for (int x = 0; x < width; x++)
-        {
-            const QRgb &rgb = line[x];
-            const int r = qRed(rgb);
-            const int g = qGreen(rgb);
-            const int b = qBlue(rgb);
-            // this
-            const auto index = index_2d_arrayC(x, y, width);
-
-            ImageGridRed[index] = r;
-            ImageGridGreen[index] = g;
-            ImageGridBlue[index] = b;
-
-            ImageGrid[index] = (0.114 * b + 0.587 * g + 0.299 * r);
-        }
-    }
-
-//plase double check from here
-
     int TemoMAX_X = Step_X * std::floor(image.width() >> 1);
     int TemoMAX_Y = Step_Y * std::floor(image.height() >> 1);
 
@@ -121,6 +87,7 @@ void CEDD::extract(const QImage& image)
 
     CeddFuzzy10 Fuzzy10{ false };
     CeddFuzzy24 Fuzzy24{ false };
+
     for (int y = 0; y < TemoMAX_Y; y += Step_Y)
     {
         for (int x = 0; x < TemoMAX_X; x += Step_X)
@@ -135,14 +102,20 @@ void CEDD::extract(const QImage& image)
             // TEST HERE
             for (int i = y; i < y + Step_Y; i++)
             {
+                const QRgb* line = reinterpret_cast<const QRgb*>(image.scanLine(i));
                 for (int j = x; j < x + Step_X; j++)
                 {
-                    const auto index = index_2d_arrayC(j, i, width);
-                    MeanRed   += ImageGridRed[index];
-                    MeanGreen += ImageGridGreen[index];
-                    MeanBlue  += ImageGridBlue[index];
+                    const QRgb& rgb = line[j];
+                    const int r = qRed(rgb);
+                    const int g = qGreen(rgb);
+                    const int b = qBlue(rgb);
 
-                    const auto pixel = ImageGrid[index];
+                    MeanRed += r;
+                    MeanGreen += g;
+                    MeanBlue += b;
+
+                    // RGB to gray convertion.
+                    const auto pixel = (0.114 * b + 0.587 * g + 0.299 * r);
 
                     if (j < (x + Step_X / 2) && i < (y + Step_Y / 2))
                         PixelsNeighborhood.Area1 += (pixel);
@@ -179,27 +152,31 @@ void CEDD::extract(const QImage& image)
             } else {
                 T = -1;
 
-                if (MaskValues.Mask1 > T1) {
+                if (MaskValues.Mask1 > T1)
+                {
                     T++;
                     Edges[T] = 1;
                 }
-                if (MaskValues.Mask2 > T2) {
+                if (MaskValues.Mask2 > T2)
+                {
                     T++;
                     Edges[T] = 2;
                 }
-                if (MaskValues.Mask3 > T2) {
+                if (MaskValues.Mask3 > T2)
+                {
                     T++;
                     Edges[T] = 3;
                 }
-                if (MaskValues.Mask4 > T3) {
+                if (MaskValues.Mask4 > T3)
+                {
                     T++;
                     Edges[T] = 4;
                 }
-                if (MaskValues.Mask5 > T3) {
+                if (MaskValues.Mask5 > T3)
+                {
                     T++;
                     Edges[T] = 5;
                 }
-
             }
 
             MeanRed   = MeanRed   / (Step_Y * Step_X);
