@@ -169,15 +169,13 @@ void CeddFuzzy10::MultiParticipate_Equal_Defazzificator(
     const std::vector<double>& Input3,
     std::array<double, 10>* ResultTable)
 {
-    int RuleActivation = -1;
-
     for (int i = 0; i < rules_len; i++)
     {
         if ((Input1[Rules[i].Input1] > 0) &&
             (Input2[Rules[i].Input2] > 0) &&
             (Input3[Rules[i].Input3] > 0))
         {
-            RuleActivation = Rules[i].Output;
+            const auto RuleActivation = Rules[i].Output;
             (*ResultTable)[RuleActivation]++;
         }
     }
@@ -190,18 +188,17 @@ void CeddFuzzy10::MultiParticipate_Defazzificator(const FuzzyRules Rules[],
                                                   const std::vector<double>& Input3,
                                                   std::array<double, 10>* ResultTable)
 {
-    int RuleActivation = -1;
-
     for (int i = 0; i < rules_len; i++)
     {
         if ((Input1[Rules[i].Input1] > 0) &&
             (Input2[Rules[i].Input2] > 0) &&
             (Input3[Rules[i].Input3] > 0))
         {
-            RuleActivation = Rules[i].Output;
+            const auto RuleActivation = Rules[i].Output;
 
-            double Min = std::min(Input1[Rules[i].Input1],
-                    std::min(Input2[Rules[i].Input2], Input3[Rules[i].Input3]));
+            const auto Min =
+                std::min(Input1[Rules[i].Input1],
+                         std::min(Input2[Rules[i].Input2], Input3[Rules[i].Input3]));
 
             (*ResultTable)[RuleActivation] += Min;
         }

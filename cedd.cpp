@@ -92,11 +92,9 @@ void CEDD::extract(const QImage& image)
     {
         for (int x = 0; x < TemoMAX_X; x += Step_X)
         {
-            int MeanRed = 0;
-            int MeanGreen = 0;
-            int MeanBlue = 0;
             Neighborhood PixelsNeighborhood{};
             std::array<int, 6> Edges{};
+            std::array<Area, 4> Areas{};
             Edges.fill(-1);
 
             // TEST HERE
@@ -106,33 +104,22 @@ void CEDD::extract(const QImage& image)
                 for (int j = x; j < x + Step_X; j++)
                 {
                     const QRgb& rgb = line[j];
-                    const int r = qRed(rgb);
-                    const int g = qGreen(rgb);
-                    const int b = qBlue(rgb);
-
-                    MeanRed += r;
-                    MeanGreen += g;
-                    MeanBlue += b;
-
-                    // RGB to gray convertion.
-                    const auto pixel = (0.114 * b + 0.587 * g + 0.299 * r);
 
                     if (j < (x + Step_X / 2) && i < (y + Step_Y / 2))
-                        PixelsNeighborhood.Area1 += (pixel);
+                        Areas[0].add_color(rgb);
                     if (j >= (x + Step_X / 2) && i < (y + Step_Y / 2))
-                        PixelsNeighborhood.Area2 += (pixel);
+                        Areas[1].add_color(rgb);
                     if (j < (x + Step_X / 2) && i >= (y + Step_Y / 2))
-                        PixelsNeighborhood.Area3 += (pixel);
+                        Areas[2].add_color(rgb);
                     if (j >= (x + Step_X / 2) && i >= (y + Step_Y / 2))
-                        PixelsNeighborhood.Area4 += (pixel);
-
+                        Areas[3].add_color(rgb);
                 }
             }
             const double dd = 4.0 / (Step_X * Step_Y);
-            PixelsNeighborhood.Area1 = static_cast<int>(PixelsNeighborhood.Area1 * dd);
-            PixelsNeighborhood.Area2 = static_cast<int>(PixelsNeighborhood.Area2 * dd);
-            PixelsNeighborhood.Area3 = static_cast<int>(PixelsNeighborhood.Area3 * dd);
-            PixelsNeighborhood.Area4 = static_cast<int>(PixelsNeighborhood.Area4 * dd);
+            PixelsNeighborhood.Area1 = static_cast<int>(Areas[0].to_gray() * dd);
+            PixelsNeighborhood.Area2 = static_cast<int>(Areas[1].to_gray() * dd);
+            PixelsNeighborhood.Area3 = static_cast<int>(Areas[2].to_gray() * dd);
+            PixelsNeighborhood.Area4 = static_cast<int>(Areas[3].to_gray() * dd);
 
             MaskResults MaskValues{ PixelsNeighborhood };
 
@@ -177,6 +164,16 @@ void CEDD::extract(const QImage& image)
                     T++;
                     Edges[T] = 5;
                 }
+            }
+            int MeanRed = 0;
+            int MeanGreen = 0;
+            int MeanBlue = 0;
+
+            for (const auto& i : Areas)
+            {
+                MeanRed += i.get_red();
+                MeanGreen += i.get_green();
+                MeanBlue += i.get_blue();
             }
 
             MeanRed   = MeanRed   / (Step_Y * Step_X);

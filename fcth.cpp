@@ -78,7 +78,7 @@ void FCTH::extract(const QImage &image)
     {
         for (int x = 0; x < width - Step_X; x += Step_X)
         {
-            std::array<double, 16> Block{};
+            std::array<Area, 16> areas{};
             std::array<int, 16> BlockCount{};
 
             int MeanRed = 0;
@@ -86,8 +86,6 @@ void FCTH::extract(const QImage &image)
             int MeanBlue = 0;
 
             //#endregion
-
-            int TempSum = 0;
 
             for (int j = 0; j < Step_Y; j++)
             {
@@ -108,26 +106,24 @@ void FCTH::extract(const QImage &image)
                     const int r = qRed(rgb);
                     const int g = qGreen(rgb);
                     const int b = qBlue(rgb);
-                    const double gray = (0.114 * b + 0.587 * g + 0.299 * r);
 
                     const auto block_index =
                         CEDD::index_2d_arrayC(CurrentPixelX, CurrentPixelY, 4);
 
-                    Block[block_index] += gray;
+                    areas[block_index].add_color(rgb);
                     BlockCount[block_index]++;
 
                     MeanRed += r;
                     MeanGreen += g;
                     MeanBlue += b;
-
-                    TempSum++;
                 }
             }
 
-
+            std::array<double, 16> Block{};
             for (int i = 0; i < BlockCount.size(); i++)
             {
-                Block[i] = Block[i] / BlockCount[i];
+                const auto r = areas[i].to_gray();
+                Block[i] = r / BlockCount[i];
             }
             const auto Matrix = singlePassThreshold(Block, 1);
 

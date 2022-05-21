@@ -41,6 +41,28 @@ struct Neighborhood
     double Area4;
 };
 
+class Area
+{
+    uint32_t red;
+    uint32_t green;
+    uint32_t blue;
+
+public:
+    void add_color(const QRgb& col) noexcept
+    {
+        red += qRed(col);
+        green += qGreen(col);
+        blue += qBlue(col);
+    }
+    uint32_t get_blue() const noexcept { return blue; }
+    uint32_t get_green() const noexcept { return green; }
+    uint32_t get_red() const noexcept { return red; }
+    double to_gray() const noexcept
+    {
+        return 0.114 * blue + 0.587 * green + 0.299 * red;
+    }
+};
+
 
 struct MaskResults
 {
