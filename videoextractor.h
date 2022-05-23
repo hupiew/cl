@@ -40,7 +40,7 @@ class VideoExtractor : public QObject
 public:
     explicit VideoExtractor(QObject* parent = nullptr);
 
-    imsearch::IscIndexHelper get_data(bool set_title) const;
+    imsearch::IscIndexHelper get_data(bool set_title, uint8_t type) const;
 
     std::unique_ptr<Extractor> get_extractor();
 
@@ -53,16 +53,20 @@ public slots:
 
     void statusChanged(QMediaPlayer::MediaStatus status);
 
+    void durationChanged(qint64 duration);
+
 signals:
     void processingDone();
 
 private:
-    QMediaPlayer player;
-    QVideoSink sink;
+    QMediaPlayer* player;
+    QVideoSink* sink;
     std::unique_ptr<Extractor> extract;
+    qint64 duration;
+    int frame_count;
+
     std::vector<int8_t> data;
     std::vector<int8_t> last_desc;
     std::vector<uint32_t> time_data;
     std::string filename;
-    int frame_count;
 };

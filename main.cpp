@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
                 loop.exec();
             }
             extractor = cl.get_extractor();
-            isc.add_index(cl.get_data(!no_title));
+            isc.add_index(cl.get_data(!no_title, type));
             continue;
         }
         else if (mime.startsWith("image"))
