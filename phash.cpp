@@ -32,7 +32,7 @@ void PHash::extract(const QImage& image)
     // Compared to scaling straight to 32x32 it's a 50x speedup, on my comp at least.
     const auto interm = image.scaledToHeight(180, Qt::FastTransformation);
     const auto resized =
-        interm.scaled(32, 32, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        interm.scaled(SIDE, SIDE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     const auto dct = dct_cv(resized);
 
@@ -41,19 +41,19 @@ void PHash::extract(const QImage& image)
     {
         for (int j = 0; j < 8; ++j)
         {
-            const auto index = CEDD::index_2d_arrayC(j, i, 32);
+            const auto index = CEDD::index_2d_arrayC(j, i, SIDE);
             sum += dct[index];
         }
     }
     sum -= dct[0];
-    const auto mean = sum / 64;
+    const auto mean = sum / 64; // 8*8
 
     uint64_t hash = 0;
     for (int i = 0; i < 8; ++i)
     {
         for (int j = 0; j < 8; ++j)
         {
-            const auto index = CEDD::index_2d_arrayC(j, i, 32);
+            const auto index = CEDD::index_2d_arrayC(j, i, SIDE);
 
             hash = hash << 1;
             if (dct[index] < mean) hash += 1;
@@ -75,9 +75,9 @@ std::vector<int8_t> PHash::get_descriptor() const
 
 std::vector<float> PHash::dct_cv(const QImage& image)
 {
-    if (image.width() != image.height() && image.width() != 32)
+    if (image.width() != image.height() && image.width() != SIDE)
         throw std::length_error("Image has the wrong dimentions.");
-    auto output = std::vector<float>(32 * 32);
+    auto output = std::vector<float>(SIDE * SIDE);
 
     for (int i = 0; i < image.height(); ++i)
     {
@@ -97,15 +97,15 @@ std::vector<float> PHash::dct_cv(const QImage& image)
     }
 
     // Row dct
-    for (int i = 0; i < 32; ++i)
+    for (int i = 0; i < SIDE; ++i)
     {
-        dct_step(&output, i * 32, 1);
+        dct_step(&output, i * SIDE, 1);
     }
 
     // Column dct
-    for (int i = 0; i < 32; ++i)
+    for (int i = 0; i < SIDE; ++i)
     {
-        dct_step(&output, i, 32);
+        dct_step(&output, i, SIDE);
     }
 
     dct_scale(&output);
@@ -115,12 +115,11 @@ std::vector<float> PHash::dct_cv(const QImage& image)
 
 void PHash::dct_step(std::vector<float>* in_vector, int start, int step)
 {
-    std::array<float, 32> tmp;
-    constexpr int N = 32;
-    constexpr float piN = (355.f / 113) / N;
+    std::array<float, SIDE> tmp;
+    constexpr float piN = (355.f / 113) / SIDE;
     auto& input = *in_vector;
 
-    for (int k = 0; k < N; ++k)
+    for (int k = 0; k < SIDE; ++k)
     {
         float cnt = 0.0;
         for (int n = 0; n < 32; ++n)
@@ -131,7 +130,7 @@ void PHash::dct_step(std::vector<float>* in_vector, int start, int step)
         tmp[k] = cnt;
     }
 
-    for (int k = 0; k < N; ++k)
+    for (int k = 0; k < SIDE; ++k)
     {
         const auto index = start + step * k;
         input[index] = tmp[k];
@@ -144,11 +143,11 @@ void PHash::dct_scale(std::vector<float>* input)
     const auto fe = std::sqrt(1 / (32.f * 4));
 
     (*input)[0] = (*input)[0] * f;
-    for (int i = 0; i < 32; ++i)
+    for (int i = 0; i < SIDE; ++i)
     {
-        for (int j = 0; j < 32; ++j)
+        for (int j = 0; j < SIDE; ++j)
         {
-            const auto index = CEDD::index_2d_arrayC(j, i, 32);
+            const auto index = CEDD::index_2d_arrayC(j, i, SIDE);
             if (i == 0 && j == 0) continue;
             if (i == 0 || j == 0) (*input)[index] = (*input)[index] * fe;
             else

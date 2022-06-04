@@ -26,6 +26,8 @@ class PHash : public Extractor
 {
 public:
     PHash();
+    // Length of a side of our square image
+    static constexpr int SIDE = 32;
 
     virtual void extract(const QImage& image) override;
 
