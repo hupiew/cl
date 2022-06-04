@@ -29,6 +29,7 @@
 
 #include <cedd.h>
 #include <cl.h>
+#include <dhash.h>
 #include <extractor.h>
 #include <fcth.h>
 #include <jcd.h>
@@ -55,7 +56,8 @@ int main(int argc, char *argv[])
         QStringList() << "d"
                       << "hasher",
         QCoreApplication::translate(
-            "main", "Which image descriptor to use. cl, cedd, fcth, jcd or phash"),
+            "main",
+            "Which image descriptor to use. cl, cedd, fcth, jcd, phash or dhash"),
         "hasher",
         "cl");
     QCommandLineOption nameOption(
@@ -113,6 +115,11 @@ int main(int argc, char *argv[])
     {
         extractor = std::make_unique<PHash>();
         type = 1;
+    }
+    else if (hasher == "dhash")
+    {
+        extractor = std::make_unique<DHash>();
+        type = 0;
     }
     else
     {

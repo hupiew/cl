@@ -16,6 +16,7 @@ SOURCES += \
         ceddquant.cpp \
         cl.cpp \
         compactceddquant.cpp \
+        dhash.cpp \
         extractor.cpp \
         fcth.cpp \
         fcthquant.cpp \
@@ -39,6 +40,7 @@ HEADERS += \
     ceddquant.h \
     cl.h \
     compactceddquant.h \
+    dhash.h \
     extractor.h \
     fcth.h \
     fcthquant.h \
