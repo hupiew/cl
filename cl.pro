@@ -22,6 +22,7 @@ SOURCES += \
         fuzzyfcth.cpp \
         jcd.cpp \
         main.cpp \
+        phash.cpp \
         util/BytesView.cpp \
         util/IscFileHelper.cpp \
         videoextractor.cpp
@@ -43,6 +44,7 @@ HEADERS += \
     fcthquant.h \
     fuzzyfcth.h \
     jcd.h \
+    phash.h \
     util/BytesView.hpp \
     util/IscFileHelper.hpp \
     videoextractor.h

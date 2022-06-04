@@ -32,6 +32,7 @@
 #include <extractor.h>
 #include <fcth.h>
 #include <jcd.h>
+#include <phash.h>
 #include <util/IscFileHelper.hpp>
 #include <videoextractor.h>
 
@@ -54,7 +55,7 @@ int main(int argc, char *argv[])
         QStringList() << "d"
                       << "hasher",
         QCoreApplication::translate(
-            "main", "Which image descriptor to use. cl, cedd, fcth or jcd"),
+            "main", "Which image descriptor to use. cl, cedd, fcth, jcd or phash"),
         "hasher",
         "cl");
     QCommandLineOption nameOption(
@@ -107,6 +108,11 @@ int main(int argc, char *argv[])
     {
         extractor = std::make_unique<JCD>();
         type = 6;
+    }
+    else if (hasher == "phash")
+    {
+        extractor = std::make_unique<PHash>();
+        type = 1;
     }
     else
     {
