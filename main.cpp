@@ -190,14 +190,18 @@ int main(int argc, char *argv[])
     if (make_isc)
     {
         const auto data = isc.to_file();
-        const auto bytes =
-            QByteArray(reinterpret_cast<const char*>(data.data()), data.size());
-        auto file = QFile{ "output.isc" };
+
+        const auto filepath = QUrl(args[0]);
+        auto file = QFile{ filepath.fileName() + ".isc" };
+
+        int written = 0;
         if (file.open(QIODevice::ReadWrite))
         {
             QDataStream stream(&file);
-            stream << bytes;
+            written = stream.writeRawData(reinterpret_cast<const char*>(data.data()),
+                                          static_cast<int>(data.size()));
         }
+        std::cout << "Wrote " << written << " out of " << data.size() << " bytes.\n";
     }
     //return a.exec();
 }
