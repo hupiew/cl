@@ -1,5 +1,6 @@
 # cl
-CL, Originally standing for ColorLayout, is a small console app, to extract feature vectors from images.
+CL, Originally standing for ColorLayout, is a small console app, to extract features from images.
+Has the abiliy to output files that can be read by [ImSearch](https://gitlab.com/Hupie69xd/imsearch)
 
 # Usage
 > Usage: cl [options] images/videos
@@ -16,7 +17,8 @@ CL, Originally standing for ColorLayout, is a small console app, to extract feat
 >                                                     information.
 >                                                     
 >  -d, --hasher <hasher>                              Which image descriptor to
->                                                     use. cl, cedd, fcth or jcd
+>                                                     use. cl, cedd, fcth, jcd,
+>                                                     phash or dhash
 >  
 >  -n, --name <name>                                  Name field of the Isc
 >                                                     File, default is empty
@@ -27,7 +29,9 @@ CL, Originally standing for ColorLayout, is a small console app, to extract feat
 >  
 >  --isc                                              Produce an Isc file to be
 >                                                     loaded by ImSearch.
+>
 >Arguments:
+>
 >  images/videos                                      Images or video to
 >                                                     process.
 

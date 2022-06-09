@@ -122,7 +122,7 @@ void PHash::dct_step(std::vector<float>* in_vector, int start, int step)
     for (int k = 0; k < SIDE; ++k)
     {
         float cnt = 0.0;
-        for (int n = 0; n < 32; ++n)
+        for (int n = 0; n < SIDE; ++n)
         {
             const auto xn = input[start + step * n];
             cnt += xn * std::cos(piN * (n + 0.5) * k);

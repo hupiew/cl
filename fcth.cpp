@@ -188,8 +188,8 @@ std::vector<int8_t> FCTH::get_descriptor() const
     std::vector<int8_t> result(length);
     for (auto i = 0u; i < result.size(); i++)
     {
-        int tmp = (static_cast<int>(histogram[(i << 1)] * 2)) << 4;
-        tmp = (tmp | ((int)(histogram[(i << 1) + 1] * 2)));
+        int tmp = static_cast<int>(histogram[i << 1] * 2) << 4;
+        tmp = tmp | static_cast<int>(histogram[(i << 1) + 1] * 2);
         result[i] = static_cast<int8_t>(tmp - 128);
     }
     return result;

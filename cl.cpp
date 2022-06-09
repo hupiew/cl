@@ -226,8 +226,7 @@ void ColorLayoutExtractor::fdct(std::array<int, 64> &shape) noexcept
         for (int j = 0; j < 8; j++)
         {
             double s { 0.0 };
-            for (int k = 0; k < 8; k++)
-                s += cosins[j][k] * shape[8 * i + k];
+            for (int k = 0; k < 8; k++) s += cosins[j][k] * shape[8 * i + k];
             dct[8 * i + j] = s; // 0-63
         }
     }
@@ -252,6 +251,7 @@ void ColorLayoutExtractor::extract_shape(const QImage& image) noexcept
     for (int y = 0; y < image.height(); ++y)
     {
         const QRgb *line = reinterpret_cast<const QRgb*>(image.scanLine(y));
+        const int y_axis = y * 8 / image.height();
         for (int x = 0; x < image.width(); ++x)
         {
             const QRgb &rgb = line[x];
@@ -259,9 +259,8 @@ void ColorLayoutExtractor::extract_shape(const QImage& image) noexcept
             const int green = qGreen(rgb);
             const int blue = qBlue(rgb);
 
-            const int y_axis = y * 8 / image.height();
             const int x_axis = x * 8 / image.width();
-            const int k = (y_axis << 3) + x_axis;
+            const int k = y_axis * 8 + x_axis;
 
             const double yy = (0.299 * red + 0.587 * green + 0.114 * blue) / 256.0;
             sum[0][k] += static_cast<int>(219.0 * yy + 16.5);
@@ -275,10 +274,7 @@ void ColorLayoutExtractor::extract_shape(const QImage& image) noexcept
     {
         for (int i = 0; i < 64; ++i)
         {
-            shapes[k][i] = cnt[i] != 0 ?
-                        sum[k][i] / cnt[i]
-                      : 0;
+            shapes[k][i] = (cnt[i] != 0) ? (sum[k][i] / cnt[i]) : 0;
         }
-
     }
 }
