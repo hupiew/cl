@@ -9,6 +9,8 @@ INCLUDEPATH += $$PWD/flatbuffers/include
 # In order to do so, uncomment the following line.
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+LIBS += -lavcodec -lavformat -lavutil -lswscale
+
 SOURCES += \
         cedd.cpp \
         ceddfuzzy10.cpp \
@@ -26,7 +28,8 @@ SOURCES += \
         phash.cpp \
         util/BytesView.cpp \
         util/IscFileHelper.cpp \
-        videoextractor.cpp
+        videoextractor.cpp \
+        videoextractorffmpeg.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -49,4 +52,5 @@ HEADERS += \
     phash.h \
     util/BytesView.hpp \
     util/IscFileHelper.hpp \
-    videoextractor.h
+    videoextractor.h \
+    videoextractorffmpeg.h

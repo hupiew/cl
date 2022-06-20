@@ -36,6 +36,9 @@
 #include <phash.h>
 #include <util/IscFileHelper.hpp>
 #include <videoextractor.h>
+#include <videoextractorffmpeg.h>
+
+#define CL_USE_FFMPEG
 
 
 int main(int argc, char *argv[])
@@ -138,9 +141,16 @@ int main(int argc, char *argv[])
                 std::cerr << "Video hashing only works with the --isc option" << '\n';
                 std::terminate();
             }
+#if defined(CL_USE_FFMPEG)
+            auto cl = VideoExtractorFFmpeg();
+#else
             auto cl = VideoExtractor();
+#endif
             cl.set_extractor(std::move(extractor));
             const auto url = QUrl::fromLocalFile(item);
+#if defined(CL_USE_FFMPEG)
+            cl.load_video(url);
+#else
             {
                 QEventLoop loop;
                 QObject::connect(
@@ -148,6 +158,7 @@ int main(int argc, char *argv[])
                 cl.load_video(url);
                 loop.exec();
             }
+#endif
             extractor = cl.get_extractor();
             isc.add_index(cl.get_data(!no_title, type));
             continue;
@@ -203,5 +214,5 @@ int main(int argc, char *argv[])
         }
         std::cout << "Wrote " << written << " out of " << data.size() << " bytes.\n";
     }
-    //return a.exec();
+    // return app.exec();
 }
