@@ -17,6 +17,7 @@
 
 #include <phash.h>
 
+#include <cmath>
 #include <stdexcept>
 
 #include <cedd.h>
@@ -75,7 +76,7 @@ std::vector<int8_t> PHash::get_descriptor() const
 
 std::vector<float> PHash::dct_cv(const QImage& image)
 {
-    if (image.width() != image.height() && image.width() != SIDE)
+    if (image.width() != image.height() || image.width() != SIDE)
         throw std::length_error("Image has the wrong dimentions.");
     auto output = std::vector<float>(SIDE * SIDE);
 
