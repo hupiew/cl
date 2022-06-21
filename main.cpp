@@ -77,10 +77,19 @@ int main(int argc, char *argv[])
     QCommandLineOption makeIscOption(
         QStringList() << "isc"
                       << "Produce an Isc file to be loaded by ImSearch.");
+    QCommandLineOption showLicenseOption(QStringList()
+                                         << "license"
+                                         << "Display short license information.");
+    QCommandLineOption noCopyrightOption(QStringList()
+                                         << "x"
+                                         << "Don't display the copyright notice.");
+
     parser.addOption(hasherOption);
     parser.addOption(nameOption);
     parser.addOption(titleOption);
     parser.addOption(makeIscOption);
+    parser.addOption(showLicenseOption);
+    parser.addOption(noCopyrightOption);
 
     parser.process(app);
     const QString hasher = parser.value(hasherOption).toLower();
@@ -91,6 +100,34 @@ int main(int argc, char *argv[])
     isc.set_name(parser.value(nameOption).toStdString());
     const bool make_isc = parser.isSet(makeIscOption);
     const bool no_title = parser.isSet(titleOption);
+
+    // License memes
+    if (parser.isSet(showLicenseOption))
+    {
+        std::cout << R"XK6T(   CL
+   Copyright (C) 2022  Hupie (hupiew[at]gmail.com)
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+)XK6T";
+        return 0;
+    }
+    if (!parser.isSet(noCopyrightOption))
+    {
+        std::cout << "CL Copyright (C) 2022  Hupie\n"
+                  << "This is free software, and you are welcome to redistribute it\n"
+                  << "under certain conditions; run `cl --license' for details.\n";
+    }
 
     std::unique_ptr<Extractor> extractor;
     uint8_t type = 255;
