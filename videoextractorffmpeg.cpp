@@ -62,9 +62,12 @@ void VideoExtractorFFmpeg::throw_error(const char* what)
 }
 
 VideoExtractorFFmpeg::VideoExtractorFFmpeg()
-  : filename()
-  , duration(0)
+  : extract(nullptr)
+  , duration(-1)
   , frame_count(0)
+  , width(0)
+  , height(0)
+  , pix_fmt(AV_PIX_FMT_NONE)
   , frame(av_frame_alloc())
   , dest(av_frame_alloc())
   , pkt(av_packet_alloc())
@@ -134,7 +137,7 @@ void VideoExtractorFFmpeg::main_loop()
     const auto stream = fmt_ctx->streams[video_stream_idx];
     if (stream)
     {
-        auto dur = std::max(stream->duration, int64_t(-1));
+        auto dur = std::max(stream->duration, duration);
 
         duration = (dur * stream->time_base.num) / stream->time_base.den;
     }
