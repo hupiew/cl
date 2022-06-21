@@ -62,7 +62,7 @@ constexpr double QuantTable[8 * 8] = {
     79555.402607004813,
     //};
     // constexpr std::array<double, 8> QuantTable4 = {
-    05.4642173212585,
+    405.4642173212585,
     4877.9763319071481,
     10882.170090625908,
     18167.239081219657,
@@ -114,6 +114,7 @@ std::vector<double> CEDDQuant::apply(std::array<double, 144> Local_Edge_Histogra
         {
             if (ElementsDistance[j] < Max)
             {
+                // Is this not min?
                 Max = ElementsDistance[j];
                 Edge_HistogramElement[i] = j;
             }

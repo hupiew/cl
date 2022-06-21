@@ -14,6 +14,7 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <https://www.gnu.org/licenses/>. */
+// https://gitlab.com/Hupie69xd/imsearch/-/blob/b9ccb4b161e65cbbc63e0fc15c568e2284b109cd/util/IscFileHelper.cpp
 
 #include <util/IscFileHelper.hpp>
 
