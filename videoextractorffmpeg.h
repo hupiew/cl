@@ -24,9 +24,6 @@
 #include <QUrl>
 extern "C"
 {
-#include <libavutil/avutil.h>
-#include <libavutil/pixfmt.h>
-
     struct AVCodecContext;
     struct AVFormatContext;
     struct AVFrame;
@@ -58,7 +55,6 @@ class VideoExtractorFFmpeg
     // FFmpeg data
     AVFormatContext* fmt_ctx = nullptr;
     AVCodecContext* video_dec_ctx = nullptr;
-    AVPixelFormat pix_fmt;
     AVFrame* frame;
     AVFrame* dest;
     AVPacket* pkt;
@@ -88,8 +84,7 @@ private:
 
     static int open_codec_context(int* stream_idx,
                                   AVCodecContext** dec_ctx,
-                                  AVFormatContext* fmt_ctx,
-                                  enum AVMediaType type);
+                                  AVFormatContext* fmt_ctx);
 
     QImage to_qimage(const AVFrame& frame);
 };

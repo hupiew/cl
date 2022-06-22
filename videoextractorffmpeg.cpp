@@ -48,7 +48,9 @@ extern "C"
 {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libavutil/avutil.h>
 #include <libavutil/imgutils.h>
+#include <libavutil/pixfmt.h>
 #include <libswscale/swscale.h>
 }
 
@@ -67,7 +69,6 @@ VideoExtractorFFmpeg::VideoExtractorFFmpeg()
   , frame_count(0)
   , width(0)
   , height(0)
-  , pix_fmt(AV_PIX_FMT_NONE)
   , frame(av_frame_alloc())
   , dest(av_frame_alloc())
   , pkt(av_packet_alloc())
@@ -129,8 +130,7 @@ void VideoExtractorFFmpeg::main_loop()
 {
     int ret = 0;
 
-    if (open_codec_context(
-            &video_stream_idx, &video_dec_ctx, fmt_ctx, AVMEDIA_TYPE_VIDEO) < 0)
+    if (open_codec_context(&video_stream_idx, &video_dec_ctx, fmt_ctx) < 0)
         throw_error("Could not open codec context.");
 
 
@@ -145,7 +145,6 @@ void VideoExtractorFFmpeg::main_loop()
     /* allocate image where the decoded image will be put */
     width = video_dec_ctx->width;
     height = video_dec_ctx->height;
-    pix_fmt = video_dec_ctx->pix_fmt;
 
     /* read frames from the file */
     while (av_read_frame(fmt_ctx, pkt) == 0)
@@ -228,12 +227,11 @@ void VideoExtractorFFmpeg::extract_image(const AVFrame* frame)
 
 int VideoExtractorFFmpeg::open_codec_context(int* stream_idx,
                                              AVCodecContext** dec_ctx,
-                                             AVFormatContext* fmt_ctx,
-                                             AVMediaType type)
+                                             AVFormatContext* fmt_ctx)
 {
-    int ret, stream_index;
+    constexpr auto type = AVMEDIA_TYPE_VIDEO;
 
-    ret = av_find_best_stream(fmt_ctx, type, -1, -1, NULL, 0);
+    int ret = av_find_best_stream(fmt_ctx, type, -1, -1, NULL, 0);
     if (ret)
     {
         std::cerr << "Could not find " << av_get_media_type_string(type)
@@ -241,7 +239,7 @@ int VideoExtractorFFmpeg::open_codec_context(int* stream_idx,
         return ret;
     }
 
-    stream_index = ret;
+    int stream_index = ret;
     AVStream* st = fmt_ctx->streams[stream_index];
 
     /* find decoder for the stream */
