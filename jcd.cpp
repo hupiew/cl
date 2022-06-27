@@ -70,32 +70,34 @@ void JCD::extract(const QImage& image)
 
 std::vector<int8_t> JCD::get_descriptor() const
 {
-    int len = 0;
-    int8_t tmpVal = 0;
+    // Negative number that counts the amount of sequential (not total) zeros.
+    int8_t zero_count = 0;
 
-    auto result = std::vector<int8_t>(data.size());
-    for (auto i = 0u; i < data.size(); i++)
+    auto result = std::vector<int8_t>();
+    for (const auto& item : data)
     {
-        if (data[i] > 0)
+        if (item > 0)
         {
-            if (tmpVal < 0)
+            if (zero_count)
             {
-                result[len] = tmpVal;
-                tmpVal = 0;
-                len++;
+                result.push_back(zero_count);
+                zero_count = 0;
             }
-            result[len] = static_cast<int8_t>(2 * data[i]);
-            len++;
+            result.push_back(static_cast<int8_t>(2 * item));
+        }
+        else if (zero_count == -128) // prevent underflow (undefined behavior)
+        {
+            result.push_back(zero_count);
+            zero_count = -1;
         }
         else
         {
-            tmpVal--;
+            zero_count--;
         }
     }
-    if (tmpVal < 0)
+    if (zero_count)
     {
-        result[len] = tmpVal;
+        result.push_back(zero_count);
     }
-    result.resize(len + 1);
     return result;
 }
