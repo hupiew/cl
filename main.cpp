@@ -41,7 +41,7 @@
 #define CL_USE_FFMPEG
 
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("cl");
@@ -105,7 +105,17 @@ int main(int argc, char *argv[])
     if (parser.isSet(showLicenseOption))
     {
         std::cout << R"XK6T(   CL
-   Copyright (C) 2022  Hupie (hupiew[at]gmail.com)
+   This software uses libraries from the FFmpeg project under the LGPLv2.1
+    http://ffmpeg.org
+
+   This program uses code from LIRE under the GPLv2.0-or-later
+    http://www.semanticmetadata.net/lire, http://www.lire-project.net
+    LIRE, Copyright (C) 2002-2013 Mathias Lux (mathias@juggle.at)
+
+   This program uses libraries from QT under the LGPLv3.0
+    http://qt.io
+
+   CL, Copyright (C) 2022  Hupie (hupiew[at]gmail.com)
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -166,7 +176,7 @@ int main(int argc, char *argv[])
         std::cerr << "Unsupported hasher." << '\n';
         std::terminate();
     }
-    for (const auto& item: args)
+    for (const auto& item : args)
     {
         QMimeDatabase db;
         auto mime = db.mimeTypeForFile(item).name();
