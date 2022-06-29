@@ -36,9 +36,9 @@ public:
     virtual bool is_variable() const noexcept override { return false; }
 
 private:
-    std::vector<float> dct_cv(const QImage& image);
-    void dct_step(std::vector<float>* input, int start, int step);
-    void dct_scale(std::vector<float>* input);
+    static std::vector<float> dct_cv(const QImage& image);
+    static void dct_step(std::vector<float>* input, int start, int step);
+    static void dct_scale(std::vector<float>* input);
 
 protected:
     uint64_t hash;
