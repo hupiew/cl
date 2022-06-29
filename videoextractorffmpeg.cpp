@@ -41,6 +41,7 @@
 #include <videoextractorffmpeg.h>
 
 #include <algorithm>
+#include <chrono>
 #include <exception>
 #include <iostream>
 
@@ -49,6 +50,7 @@ extern "C"
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
+#include <libavutil/frame.h>
 #include <libavutil/imgutils.h>
 #include <libavutil/pixfmt.h>
 #include <libswscale/swscale.h>
@@ -71,7 +73,9 @@ VideoExtractorFFmpeg::VideoExtractorFFmpeg()
   , height(0)
   , frame(av_frame_alloc())
   , dest(av_frame_alloc())
+  , sw_frame(nullptr)
   , pkt(av_packet_alloc())
+  , using_hw(false)
 {
     if (!frame) throw_error();
     if (!dest) throw_error();
@@ -84,8 +88,10 @@ VideoExtractorFFmpeg::~VideoExtractorFFmpeg()
     if (video_dec_ctx) avcodec_free_context(&video_dec_ctx);
     if (frame) av_frame_free(&frame);
     if (dest) av_frame_free(&dest);
-    av_packet_free(&pkt); // nullptr NOP
+    if (sw_frame) av_frame_free(&sw_frame);
+    if (pkt) av_packet_free(&pkt);
     if (sws_context) sws_freeContext(sws_context);
+    if (hw_frame_buff) av_buffer_unref(&hw_frame_buff);
 }
 
 imsearch::IscIndexHelper VideoExtractorFFmpeg::get_data(bool set_title,
@@ -130,9 +136,8 @@ void VideoExtractorFFmpeg::main_loop()
 {
     int ret = 0;
 
-    if (open_codec_context(&video_stream_idx, &video_dec_ctx, fmt_ctx) < 0)
+    if (open_codec_context(&video_stream_idx, &video_dec_ctx, fmt_ctx) != 0)
         throw_error("Could not open codec context.");
-
 
     const auto stream = fmt_ctx->streams[video_stream_idx];
     if (stream)
@@ -142,7 +147,6 @@ void VideoExtractorFFmpeg::main_loop()
         duration = (dur * stream->time_base.num) / stream->time_base.den;
     }
 
-    /* allocate image where the decoded image will be put */
     width = video_dec_ctx->width;
     height = video_dec_ctx->height;
 
@@ -155,13 +159,17 @@ void VideoExtractorFFmpeg::main_loop()
             ret = decode_packet(frame, video_dec_ctx, pkt);
 
         av_packet_unref(pkt);
-        if (ret < 0) break;
+        if (ret != 0) break;
     }
-    std::cout << "Processed " << frame_count << " frames\n"
+    std::cout << "Saving " << frame_count << " hashes     \n"
               << "from roughly " << time_data.size() + 1 << " seconds of video\n";
+#if defined(CL_PERFORMANCE_BENCHMARK)
+    std::cout << "Decode took " << decode_time << ", desc took " << desc_time
+              << ", convert took " << convert_time << '\n';
+#endif
 
     /* flush the decoders */
-    if (video_dec_ctx) decode_packet(frame, video_dec_ctx, nullptr);
+    decode_packet(frame, video_dec_ctx, nullptr);
 }
 
 
@@ -169,7 +177,18 @@ int VideoExtractorFFmpeg::decode_packet(AVFrame* frame,
                                         AVCodecContext* dec,
                                         const AVPacket* pkt)
 {
+#if defined(CL_PERFORMANCE_BENCHMARK)
+    const auto start_d = std::chrono::high_resolution_clock::now();
+
+#endif
     int ret = avcodec_send_packet(dec, pkt);
+
+#if defined(CL_PERFORMANCE_BENCHMARK)
+    const auto end_d = std::chrono::high_resolution_clock::now();
+    decode_time +=
+        std::chrono::duration_cast<std::chrono::microseconds>(end_d - start_d).count();
+
+#endif
 
     // get all the available frames from the decoder
     while (!ret)
@@ -188,8 +207,19 @@ int VideoExtractorFFmpeg::decode_packet(AVFrame* frame,
         // skip if it isn't a frame
         if (dec->codec->type != AVMEDIA_TYPE_VIDEO) continue;
 
-        extract_image(frame);
-        av_frame_unref(frame);
+        if (using_hw)
+        {
+            av_hwframe_transfer_data(sw_frame, frame, 0);
+            av_frame_copy_props(sw_frame, frame);
+            extract_image(sw_frame);
+            av_frame_unref(frame);
+            av_frame_unref(sw_frame);
+        }
+        else
+        {
+            extract_image(frame);
+            av_frame_unref(frame);
+        }
     }
     return 0;
 }
@@ -203,10 +233,20 @@ void VideoExtractorFFmpeg::extract_image(const AVFrame* frame)
     const auto seconds = (stream->time_base.num * frame->pts) / stream->time_base.den;
     std::cout << "Processing " << seconds << "/" << duration << "(s)\r" << std::flush;
 
+#if defined(CL_PERFORMANCE_BENCHMARK)
+    const auto start_d = std::chrono::high_resolution_clock::now();
+
+#endif
     const QImage scaled = image.scaledToHeight(480);
     if (scaled.isNull()) return;
 
     extract->extract(scaled);
+#if defined(CL_PERFORMANCE_BENCHMARK)
+    const auto end_d = std::chrono::high_resolution_clock::now();
+    desc_time +=
+        std::chrono::duration_cast<std::chrono::microseconds>(end_d - start_d).count();
+
+#endif
     const auto desc = extract->get_descriptor();
     if (desc != last_desc)
     {
@@ -216,13 +256,41 @@ void VideoExtractorFFmpeg::extract_image(const AVFrame* frame)
         for (const auto& i : desc)
         {
             if (i == -128)
-                throw std::runtime_error("To support variable length descriptors more "
-                                         "work is needed, complain to Hupie about it.");
+            {
+                std::cerr << "To support variable length descriptors more work is "
+                             "needed, complain to Hupie about it.";
+                throw std::runtime_error("Variable descriptors not implemented.");
+            }
         }
         frame_count++;
         while (time_data.size() < seconds) time_data.emplace_back(frame_count);
     }
     last_desc = std::move(desc);
+}
+
+int VideoExtractorFFmpeg::hw_decode_init(AVCodecContext* context)
+{
+    int ret =
+        av_hwdevice_ctx_create(&hw_frame_buff, AV_HWDEVICE_TYPE_VDPAU, NULL, NULL, 0);
+    int device = AV_HWDEVICE_TYPE_VDPAU;
+
+    if (ret != 0)
+    {
+        ret = av_hwdevice_ctx_create(
+            &hw_frame_buff, AV_HWDEVICE_TYPE_DXVA2, NULL, NULL, 0);
+        device = AV_HWDEVICE_TYPE_DXVA2;
+    }
+    sw_frame = av_frame_alloc();
+
+    if (ret != 0 || !sw_frame)
+    {
+        std::cerr << "Unable to use hardware decoding.";
+        return -1;
+    }
+    context->hw_device_ctx = av_buffer_ref(hw_frame_buff);
+
+    using_hw = true;
+    return device;
 }
 
 int VideoExtractorFFmpeg::open_codec_context(int* stream_idx,
@@ -231,7 +299,8 @@ int VideoExtractorFFmpeg::open_codec_context(int* stream_idx,
 {
     constexpr auto type = AVMEDIA_TYPE_VIDEO;
 
-    int ret = av_find_best_stream(fmt_ctx, type, -1, -1, NULL, 0);
+    const AVCodec* dec = nullptr;
+    int ret = av_find_best_stream(fmt_ctx, type, -1, -1, &dec, 0);
     if (ret)
     {
         std::cerr << "Could not find " << av_get_media_type_string(type)
@@ -243,7 +312,8 @@ int VideoExtractorFFmpeg::open_codec_context(int* stream_idx,
     AVStream* st = fmt_ctx->streams[stream_index];
 
     /* find decoder for the stream */
-    const AVCodec* dec = avcodec_find_decoder(st->codecpar->codec_id);
+    // not done for hw
+    // dec = avcodec_find_decoder(st->codecpar->codec_id);
     if (!dec)
     {
         std::cerr << "Failed to find codec " << av_get_media_type_string(type) << '\n';
@@ -267,6 +337,32 @@ int VideoExtractorFFmpeg::open_codec_context(int* stream_idx,
         return ret;
     }
 
+    // ******** Hardware stuff
+    ret = hw_decode_init(*dec_ctx);
+    if (0 < ret)
+    {
+        auto device = AVHWDeviceType(ret);
+        for (int i = 0;; i++)
+        {
+            const AVCodecHWConfig* config = avcodec_get_hw_config(dec, i);
+            if (!config)
+            {
+                (*dec_ctx)->hw_device_ctx = nullptr;
+                break;
+            }
+            if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX &&
+                config->device_type == device)
+            {
+                // hw_pixel_format = config->pix_fmt;
+                ret = 0;
+                break;
+            }
+        }
+    }
+    if (ret)
+        std::cerr << "Could not use hardware decode, using software decode...\n";
+
+
     /* Init the decoders */
     if ((ret = avcodec_open2(*dec_ctx, dec, NULL)) < 0)
     {
@@ -281,6 +377,11 @@ int VideoExtractorFFmpeg::open_codec_context(int* stream_idx,
 // This fucntion does not work on big-endian computers
 QImage VideoExtractorFFmpeg::to_qimage(const AVFrame& frame)
 {
+#if defined(CL_PERFORMANCE_BENCHMARK)
+    const auto start_d = std::chrono::high_resolution_clock::now();
+
+#endif
+
     // setup
     if (sws_context == nullptr)
     {
@@ -320,6 +421,12 @@ QImage VideoExtractorFFmpeg::to_qimage(const AVFrame& frame)
         if (slice != height) throw_error("Output height does not match input height");
         // qDebug() << dest->data[0] << width << height << dest->linesize[0] << slice;
     }
+#if defined(CL_PERFORMANCE_BENCHMARK)
+    const auto end_d = std::chrono::high_resolution_clock::now();
+    convert_time +=
+        std::chrono::duration_cast<std::chrono::microseconds>(end_d - start_d).count();
+
+#endif
     //  QImage does NOT make a copy of dest->data
     return { dest->data[0], width, height, dest->linesize[0], QImage::Format_RGB32 };
 }

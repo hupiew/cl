@@ -30,6 +30,7 @@ extern "C"
     struct AVPacket;
     struct AVStream;
     struct SwsContext;
+    struct AVBufferRef;
 }
 
 #include <extractor.h>
@@ -37,7 +38,7 @@ extern "C"
 namespace imsearch {
 struct IscIndexHelper;
 }
-
+//#define CL_PERFORMANCE_BENCHMARK
 
 class VideoExtractorFFmpeg
 {
@@ -57,9 +58,18 @@ class VideoExtractorFFmpeg
     AVCodecContext* video_dec_ctx = nullptr;
     AVFrame* frame;
     AVFrame* dest;
+    AVFrame* sw_frame; // for hw decoding
     AVPacket* pkt;
     SwsContext* sws_context = nullptr;
+    AVBufferRef* hw_frame_buff = nullptr;
     int video_stream_idx = -1;
+    // int hw_pixel_format = -1;
+    bool using_hw;
+#if defined(CL_PERFORMANCE_BENCHMARK)
+    int64_t decode_time = 0;
+    int64_t desc_time = 0;
+    int64_t convert_time = 0;
+#endif
 
     void throw_error(const char* what = "Error opening video.");
 
@@ -82,9 +92,11 @@ private:
 
     void extract_image(const AVFrame* frame);
 
-    static int open_codec_context(int* stream_idx,
+    int hw_decode_init(AVCodecContext*);
+
+    int open_codec_context(int* stream_idx,
                                   AVCodecContext** dec_ctx,
-                                  AVFormatContext* fmt_ctx);
+                                 AVFormatContext* fmt_ctx);
 
     QImage to_qimage(const AVFrame& frame);
 };
