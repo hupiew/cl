@@ -87,8 +87,7 @@ std::vector<int8_t> JCD::get_descriptor() const
             }
             result.push_back(static_cast<int8_t>(2 * item));
         }
-        else if (zero_count == std::numeric_limits<int8_t>::min() + 1)
-        // I add one because variable length descriptors use -128 as a separator.
+        else if (zero_count == std::numeric_limits<int8_t>::min())
         {
             // prevent underflow (undefined behavior)
             result.push_back(zero_count);

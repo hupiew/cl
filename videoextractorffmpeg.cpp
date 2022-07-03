@@ -250,18 +250,15 @@ void VideoExtractorFFmpeg::extract_image(const AVFrame* frame)
     const auto desc = extract->get_descriptor();
     if (desc != last_desc)
     {
-        if (extract->is_variable() && 0 < frame_count) data.emplace_back(-128);
-        data.insert(data.end(), desc.cbegin(), desc.cend());
-
-        for (const auto& i : desc)
+        if (extract->is_variable())
         {
-            if (i == -128)
-            {
-                std::cerr << "To support variable length descriptors more work is "
-                             "needed, complain to Hupie about it.";
-                throw std::runtime_error("Variable descriptors not implemented.");
-            }
+            if (0 < frame_count) data.emplace_back(-128);
+
+            extract->escaped_push_back({ desc.data(), desc.size() }, &data);
         }
+        else
+            data.insert(data.end(), desc.cbegin(), desc.cend());
+
         frame_count++;
         while (time_data.size() < seconds) time_data.emplace_back(frame_count);
     }
@@ -348,12 +345,12 @@ int VideoExtractorFFmpeg::open_codec_context(int* stream_idx,
             if (!config)
             {
                 (*dec_ctx)->hw_device_ctx = nullptr;
+                ret = 1;
                 break;
             }
             if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX &&
                 config->device_type == device)
             {
-                // hw_pixel_format = config->pix_fmt;
                 ret = 0;
                 break;
             }

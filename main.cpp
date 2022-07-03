@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 {
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("cl");
-    QCoreApplication::setApplicationVersion("1.1");
+    QCoreApplication::setApplicationVersion("1.4");
 
     QCommandLineParser parser;
     parser.setApplicationDescription("Extract image descriptors.");
@@ -226,7 +226,15 @@ int main(int argc, char* argv[])
         if (make_isc)
         {
             imsearch::IscIndexHelper isc_index{};
-            isc_index.add_hashdata(imsearch::BytesView(des));
+            if (extractor->is_variable())
+            {
+                std::vector<int8_t> vec{};
+                extractor->escaped_push_back(imsearch::BytesView(des), &vec);
+                isc_index.add_hashdata(imsearch::BytesView(vec));
+            }
+            else
+                isc_index.add_hashdata(imsearch::BytesView(des));
+
             // isc_index.add_imageindex({0, 0}); // Not needed I think.
             // isc_index.add_timeindex({}); // Not needed I think.
             isc_index.set_length(1);

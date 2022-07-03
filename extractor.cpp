@@ -16,3 +16,22 @@
    along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 
 #include <extractor.h>
+
+#include <cstdint>
+#include <limits.h>
+#include <vector>
+
+#include <util/BytesView.hpp>
+
+void Extractor::escaped_push_back(const imsearch::BytesView& view,
+                                  std::vector<int8_t>* vec)
+{
+    const int8_t* bytes = reinterpret_cast<const int8_t*>(view.ptr);
+    for (int i = 0; i < view.size; ++i)
+    {
+        if (bytes[i] == std::numeric_limits<int8_t>::min())
+            vec->push_back(bytes[i]); // if it is -128 we double up the value.
+
+        vec->push_back(bytes[i]);
+    }
+}

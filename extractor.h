@@ -20,8 +20,9 @@
 #include <cstdint>
 #include <vector>
 
-#include <QImage>
+#include <util/BytesView.hpp>
 
+class QImage;
 
 
 class Extractor
@@ -32,6 +33,8 @@ public:
     virtual ~Extractor() = default;
 
     virtual void extract(const QImage& image) = 0;
+
+    static void escaped_push_back(const imsearch::BytesView&, std::vector<int8_t>*);
 
     virtual std::vector<int8_t> get_descriptor() const = 0;
 

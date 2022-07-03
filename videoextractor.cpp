@@ -95,15 +95,15 @@ void VideoExtractor::receiveFrame(const QVideoFrame& frame)
     const auto desc = extract->get_descriptor();
     if (desc != last_desc)
     {
-        if (extract->is_variable() && 0 < frame_count) data.emplace_back(-128);
-        data.insert(data.end(), desc.cbegin(), desc.cend());
-
-        for (const auto& i : desc)
+        if (extract->is_variable())
         {
-            if (i == -128)
-                throw std::runtime_error("To support variable length descriptors more "
-                                         "work is needed, complain to Hupie about it.");
+            if (0 < frame_count) data.emplace_back(-128);
+
+            extract->escaped_push_back({ desc.data(), desc.size() }, &data);
         }
+        else
+            data.insert(data.end(), desc.cbegin(), desc.cend());
+
         frame_count++;
         while (time_data.size() < seconds) time_data.emplace_back(frame_count);
     }
