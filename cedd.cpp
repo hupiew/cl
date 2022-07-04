@@ -35,7 +35,6 @@
 #include <ceddfuzzy10.h>
 #include <ceddfuzzy24.h>
 #include <ceddquant.h>
-#include <compactceddquant.h>
 
 
 CEDD::CEDD() : compact(false)
@@ -230,7 +229,7 @@ void CEDD::extract(const QImage& image)
     }
     else
     {
-        qCEDD = CompactCEDDQuant::apply(CEDD);
+        qCEDD = CEDDQuant::compact_apply(CEDD);
     }
 
     for (auto i = 0u; i < qCEDD.size(); i++)

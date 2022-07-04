@@ -17,7 +17,6 @@ SOURCES += \
         ceddfuzzy24.cpp \
         ceddquant.cpp \
         cl.cpp \
-        compactceddquant.cpp \
         dhash.cpp \
         extractor.cpp \
         fcth.cpp \
@@ -42,7 +41,6 @@ HEADERS += \
     ceddfuzzy24.h \
     ceddquant.h \
     cl.h \
-    compactceddquant.h \
     dhash.h \
     extractor.h \
     fcth.h \

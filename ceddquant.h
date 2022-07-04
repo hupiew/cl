@@ -31,5 +31,7 @@
 
 struct CEDDQuant
 {
-    static std::vector<double> apply(std::array<double, 144> Local_Edge_Histogram);
+    static std::vector<double> apply(const std::array<double, 144>& histogram);
+
+    static std::vector<double> compact_apply(const std::array<double, 144>& histogram);
 };

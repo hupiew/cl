@@ -26,12 +26,14 @@
 
 #include <ceddquant.h>
 
+#include <array>
 #include <cstdlib>
+#include <vector>
 
 
 namespace {
 
-constexpr double QuantTable[8 * 8] = {
+constexpr double QuantTable[8 * 6] = {
     180.19686541079636,
     23730.024499150866,
     61457.152912541605,
@@ -94,7 +96,7 @@ constexpr double QuantTable[8 * 8] = {
 } // namespace (anonymous)
 
 
-std::vector<double> CEDDQuant::apply(std::array<double, 144> Local_Edge_Histogram)
+std::vector<double> CEDDQuant::apply(const std::array<double, 144>& histogram)
 {
     std::vector<double> Edge_HistogramElement(144);
     std::array<double, 8> ElementsDistance{};
@@ -105,8 +107,8 @@ std::vector<double> CEDDQuant::apply(std::array<double, 144> Local_Edge_Histogra
         const int quantOffset = i / 24 * 8;
         for (int j = 0; j < 8; j++)
         {
-            ElementsDistance[j] = std::abs(Local_Edge_Histogram[i] -
-                                           QuantTable[j + quantOffset] / 1000000);
+            ElementsDistance[j] =
+                std::abs(histogram[i] - QuantTable[j + quantOffset] / 1000000);
         }
 
         double Max = 1;
@@ -120,5 +122,38 @@ std::vector<double> CEDDQuant::apply(std::array<double, 144> Local_Edge_Histogra
             }
         }
     }
+    return Edge_HistogramElement;
+}
+
+std::vector<double> CEDDQuant::compact_apply(const std::array<double, 144>& histogram)
+{
+    /*
+     * In LIRE this is the size of the input array CEDD is 144,
+     * the compact descriptor is supposed to be 60 doubles long.
+     * But it seems to always be 144 long with every double past index 59 being 0.
+     */
+    std::vector<double> Edge_HistogramElement(144);
+    std::array<double, 8> ElementsDistance{};
+
+    for (int i = 0; i < 60; i++)
+    {
+        Edge_HistogramElement[i] = 0;
+        const int quantOffset = i / 10 * 8;
+        for (int j = 0; j < 8; j++)
+        {
+            ElementsDistance[j] =
+                std::abs(histogram[i] - QuantTable[j + quantOffset] / 1000000);
+        }
+        double Max = 1;
+        for (int j = 0; j < 8; j++)
+        {
+            if (ElementsDistance[j] < Max)
+            {
+                Max = ElementsDistance[j];
+                Edge_HistogramElement[i] = j;
+            }
+        }
+    }
+
     return Edge_HistogramElement;
 }
