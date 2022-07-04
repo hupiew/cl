@@ -28,32 +28,64 @@
 
 #include <array>
 
+namespace {
+
+static constexpr int quant_len = 8 * 3; // 8 items * 8 tables
+static constexpr double QuantTable[quant_len] = {
+    0.0001300887781556944,
+    0.00931731301788632,
+    0.022434355689233364,
+    0.04312054860272206,
+    0.08316864016590504,
+    0.1014305258997564,
+    0.17484065838706805,
+    0.22448041479670047,
+    //};
+    // static constexpr double QuantTable3[quant_len] = {
+    0.000239769468748322,
+    0.01732170431233569,
+    0.039113643180734695,
+    0.06933351209387438,
+    0.07912246400035514,
+    0.0909803325940354,
+    0.16179593301552486,
+    0.18472998648386427,
+    //};
+    // static constexpr double QuantTable7[quant_len] = {
+    0.00018019686541079636,
+    0.023730024499150865,
+    0.04145715291254161,
+    0.053918554375768424,
+    0.06912246400035513,
+    0.0819803325940354,
+    0.09179593301552487,
+    0.12472998648386426,
+};
+} // namespace
+
 std::array<double, 192> FcthQuant::apply(
     const std::array<double, 192>& Local_Edge_Histogram)
 {
     std::array<double, 192> Edge_HistogramElement{};
-    std::array<double, 8> ElementsDistance{};
 
     for (int i = 0; i < 192; i++)
     {
         Edge_HistogramElement[i] = 0;
-        const int quantOffset = i / 24 * 8;
+        // looks a bit weird but this selects the table we need,
+        // at 0-47 it's table 0, 48-143 it's table 1, and 144-191 it's table 2
+        const int quantOffset = (i / 48 - (i > 95)) * 8;
+
+        double min = 1;
         for (int j = 0; j < 8; j++)
         {
-            ElementsDistance[j] = std::abs(Local_Edge_Histogram[i] -
-                                           QuantTable[j + quantOffset] / 1000000);
-        }
-        double Max = 1;
-        for (int j = 0; j < 8; j++)
-        {
-            if (ElementsDistance[j] < Max)
+            auto val = std::abs(Local_Edge_Histogram[i] - QuantTable[j + quantOffset]);
+            if (val < min)
             {
-                Max = ElementsDistance[j];
+                min = val;
                 Edge_HistogramElement[i] = j;
             }
         }
     }
-
     return Edge_HistogramElement;
 }
 
