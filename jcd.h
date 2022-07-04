@@ -30,9 +30,10 @@
 
 #include <QImage>
 
-#include <cedd.h>
 #include <extractor.h>
-#include <fcth.h>
+
+class CEDD;
+class FCTH;
 
 
 
