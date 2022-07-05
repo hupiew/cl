@@ -33,65 +33,43 @@
 
 namespace {
 
-constexpr double QuantTable[8 * 6] = {
-    180.19686541079636,
-    23730.024499150866,
-    61457.152912541605,
-    113918.55437576842,
-    179122.46400035513,
-    260980.3325940354,
-    341795.93301552488,
-    554729.98648386425,
-    //};
-    // constexpr std::array<double, 8> QuantTable2 = {
-    209.25176965926232,
-    22490.5872862417345,
-    60250.8935141849988,
-    120705.788057580583,
-    181128.08709063051,
-    234132.081356900555,
-    325660.617733105708,
-    520702.175858657472,
-    //};
-    // constexpr std::array<double, 8> QuantTable3 = {
-    405.4642173212585,
-    4877.9763319071481,
-    10882.170090625908,
-    18167.239081219657,
-    27043.385568785292,
-    38129.413201299016,
-    52675.221316293857,
-    79555.402607004813,
-    //};
-    // constexpr std::array<double, 8> QuantTable4 = {
-    405.4642173212585,
-    4877.9763319071481,
-    10882.170090625908,
-    18167.239081219657,
-    27043.385568785292,
-    38129.413201299016,
-    52675.221316293857,
-    79555.402607004813,
-    //};
-    // constexpr std::array<double, 8> QuantTable5 = {
-    968.88475977695578,
-    10725.159033657819,
-    24161.205360376698,
-    41555.917344385321,
-    62895.628446402261,
-    93066.271379694881,
-    136976.13317822068,
-    262897.86056221306,
-    //};
-    // constexpr std::array<double, 8> QuantTable6 = {
-    968.88475977695578,
-    10725.159033657819,
-    24161.205360376698,
-    41555.917344385321,
-    62895.628446402261,
-    93066.271379694881,
-    136976.13317822068,
-    262897.86056221306,
+constexpr double QuantTable[8 * 4] = {
+    // Table 0
+    0.00018019686541079636,
+    0.023730024499150865,
+    0.061457152912541606,
+    0.11391855437576842,
+    0.17912246400035514,
+    0.2609803325940354,
+    0.34179593301552486,
+    0.5547299864838643,
+    // Table 1
+    0.00020925176965926233,
+    0.022490587286241735,
+    0.060250893514185,
+    0.12070578805758059,
+    0.18112808709063052,
+    0.23413208135690056,
+    0.32566061773310573,
+    0.5207021758586574,
+    // Table 2
+    0.0004054642173212585,
+    0.0048779763319071485,
+    0.010882170090625908,
+    0.018167239081219658,
+    0.027043385568785293,
+    0.03812941320129901,
+    0.05267522131629386,
+    0.07955540260700482,
+    // Table 3
+    0.0009688847597769558,
+    0.01072515903365782,
+    0.0241612053603767,
+    0.041555917344385324,
+    0.06289562844640226,
+    0.09306627137969488,
+    0.1369761331782207,
+    0.26289786056221304,
 };
 } // namespace (anonymous)
 
@@ -99,25 +77,20 @@ constexpr double QuantTable[8 * 6] = {
 std::vector<double> CEDDQuant::apply(const std::array<double, 144>& histogram)
 {
     std::vector<double> Edge_HistogramElement(144);
-    std::array<double, 8> ElementsDistance{};
 
     for (int i = 0; i < 144; i++)
     {
         Edge_HistogramElement[i] = 0;
-        const int quantOffset = i / 24 * 8;
+        // selects the quant table, there are four of them we use the 1st for 0-23
+        // 2nd for 24-47, 3rd for 48-95, and 4th for 96-143
+        const int quantOffset = (i / 48 + (23 < i)) * 8;
+        double min = 1;
         for (int j = 0; j < 8; j++)
         {
-            ElementsDistance[j] =
-                std::abs(histogram[i] - QuantTable[j + quantOffset] / 1000000);
-        }
-
-        double Max = 1;
-        for (int j = 0; j < 8; j++)
-        {
-            if (ElementsDistance[j] < Max)
+            const auto val = std::abs(histogram[i] - QuantTable[j + quantOffset]);
+            if (val < min)
             {
-                // Is this not min?
-                Max = ElementsDistance[j];
+                min = val;
                 Edge_HistogramElement[i] = j;
             }
         }
@@ -132,28 +105,25 @@ std::vector<double> CEDDQuant::compact_apply(const std::array<double, 144>& hist
      * the compact descriptor is supposed to be 60 doubles long.
      * But it seems to always be 144 long with every double past index 59 being 0.
      */
-    std::vector<double> Edge_HistogramElement(144);
-    std::array<double, 8> ElementsDistance{};
+    std::vector<double> Edge_HistogramElement(60);
 
     for (int i = 0; i < 60; i++)
     {
         Edge_HistogramElement[i] = 0;
-        const int quantOffset = i / 10 * 8;
+        /* selects table 1 for elements 0-9, table 2 for 10-19,
+         * table 3 for 20-39 and table 4 for 40-59 */
+        const int quantOffset = ((i / 20) + (9 < i)) * 8;
+        double min = 1;
         for (int j = 0; j < 8; j++)
         {
-            ElementsDistance[j] =
-                std::abs(histogram[i] - QuantTable[j + quantOffset] / 1000000);
-        }
-        double Max = 1;
-        for (int j = 0; j < 8; j++)
-        {
-            if (ElementsDistance[j] < Max)
+            const auto val = std::abs(histogram[i] - QuantTable[j + quantOffset]);
+            if (val < min)
             {
-                Max = ElementsDistance[j];
+                min = val;
+
                 Edge_HistogramElement[i] = j;
             }
         }
     }
-
     return Edge_HistogramElement;
 }
