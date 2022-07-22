@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 {
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("cl");
-    QCoreApplication::setApplicationVersion("1.4");
+    QCoreApplication::setApplicationVersion("1.4.1");
 
     QCommandLineParser parser;
     parser.setApplicationDescription("Extract image descriptors.");
@@ -74,15 +74,12 @@ int main(int argc, char* argv[])
         QStringList() << "no-title",
         QCoreApplication::translate(
             "main", "Don't use input files as titles in the Isc Index."));
-    QCommandLineOption makeIscOption(
-        QStringList() << "isc"
-                      << "Produce an Isc file to be loaded by ImSearch.");
-    QCommandLineOption showLicenseOption(QStringList()
-                                         << "license"
-                                         << "Display short license information.");
-    QCommandLineOption noCopyrightOption(QStringList()
-                                         << "x"
-                                         << "Don't display the copyright notice.");
+    QCommandLineOption makeIscOption(QStringList() << "isc",
+                                     "Produce an Isc file to be loaded by ImSearch.");
+    QCommandLineOption showLicenseOption(QStringList("license"),
+                                         "Display short license information.");
+    QCommandLineOption noCopyrightOption(QStringList("x"),
+                                         "Don't display the copyright notice.");
 
     parser.addOption(hasherOption);
     parser.addOption(nameOption);
