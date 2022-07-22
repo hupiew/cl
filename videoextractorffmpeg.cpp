@@ -296,7 +296,7 @@ int VideoExtractorFFmpeg::open_codec_context(int* stream_idx,
 {
     constexpr auto type = AVMEDIA_TYPE_VIDEO;
 
-    const AVCodec* dec = nullptr;
+    AVCodec* dec = nullptr;
     int ret = av_find_best_stream(fmt_ctx, type, -1, -1, &dec, 0);
     if (ret)
     {
