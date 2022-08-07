@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 {
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("cl");
-    QCoreApplication::setApplicationVersion("1.4.1");
+    QCoreApplication::setApplicationVersion("1.4.2");
 
     QCommandLineParser parser;
     parser.setApplicationDescription("Extract image descriptors.");

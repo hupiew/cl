@@ -30,7 +30,9 @@ void Extractor::escaped_push_back(const imsearch::BytesView& view,
     for (int i = 0; i < view.size; ++i)
     {
         if (bytes[i] == std::numeric_limits<int8_t>::min())
-            vec->push_back(bytes[i]); // if it is -128 we double up the value.
+            vec->push_back(-127); // if it is -128 we escape the value.
+        else if (bytes[i] == -127)
+            vec->push_back(-127); // if it is the escape char escape it.
 
         vec->push_back(bytes[i]);
     }
