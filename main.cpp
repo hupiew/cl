@@ -38,8 +38,6 @@
 #include <videoextractor.h>
 #include <videoextractorffmpeg.h>
 
-#define CL_USE_FFMPEG
-
 
 int main(int argc, char* argv[])
 {
@@ -136,43 +134,36 @@ int main(int argc, char* argv[])
                   << "under certain conditions; run `cl --license' for details.\n";
     }
 
+    // Type so it stays compact.
+    using constructor_func = std::function<std::unique_ptr<Extractor>()>;
+
+    const std::vector<std::tuple<int, QString, constructor_func>> descriptors = {
+        { 0, "dhash", std::make_unique<DHash> },
+        { 1, "phash", std::make_unique<PHash> },
+        { 2, "cl", std::make_unique<ColorLayoutExtractor> },
+        { 4, "cedd", std::make_unique<CEDD> },
+        { 5, "fcth", std::make_unique<FCTH> },
+        { 6, "jcd", std::make_unique<JCD> },
+    };
+
     std::unique_ptr<Extractor> extractor;
     uint8_t type = 255;
-    if (hasher == "cl")
+    for (const auto& [type_id, hasher_str, func] : descriptors)
     {
-        extractor = std::make_unique<ColorLayoutExtractor>();
-        type = 2;
+        if (hasher == hasher_str)
+        {
+            type = type_id;
+            extractor = func();
+            break;
+        }
     }
-    else if (hasher == "cedd")
+
+    if (!extractor)
     {
-        extractor = std::make_unique<CEDD>();
-        type = 4;
-    }
-    else if (hasher == "fcth")
-    {
-        extractor = std::make_unique<FCTH>();
-        type = 5;
-    }
-    else if (hasher == "jcd")
-    {
-        extractor = std::make_unique<JCD>();
-        type = 6;
-    }
-    else if (hasher == "phash")
-    {
-        extractor = std::make_unique<PHash>();
-        type = 1;
-    }
-    else if (hasher == "dhash")
-    {
-        extractor = std::make_unique<DHash>();
-        type = 0;
-    }
-    else
-    {
-        std::cerr << "Unsupported hasher." << '\n';
+        std::cerr << "FATAL: Could not find specified hasher." << '\n';
         std::terminate();
     }
+
     for (const auto& item : args)
     {
         QMimeDatabase db;
