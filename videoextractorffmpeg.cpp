@@ -1,7 +1,7 @@
-// videoextractorffmpeg.cpp
-// This file is addapted from FFmpeg/doc/examples/demuxing_decoding.c
-// with the changes I made licened under GPLv3 or later.
-/*
+/** videoextractorffmpeg.cpp
+ * This file is addapted from FFmpeg/doc/examples/demuxing_decoding.c licened under the
+ * following terms, with the changes I made available under GPLv3 or later.
+ *
  * Copyright (c) 2012 Stefano Sabatini
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,8 +21,9 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- */
-/* CL
+ **
+
+   CL
    Copyright (C) 2022  Hupie (hupiew[at]gmail.com)
 
    This program is free software: you can redistribute it and/or modify

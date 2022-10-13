@@ -1,5 +1,5 @@
-// cedd.cpp
-/* CL
+/** cedd.cpp
+   CL
    This file was originally written in Java as part of LIRE,
    and was adapted into C++ by Hupie.
 

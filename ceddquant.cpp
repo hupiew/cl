@@ -1,5 +1,5 @@
-// ceddquant.cpp
-/* CL
+/** ceddquant.cpp
+   CL
    This file was originally written in Java as part of LIRE,
    and was adapted into C++ by Hupie.
 
@@ -120,7 +120,6 @@ std::vector<double> CEDDQuant::compact_apply(const std::array<double, 144>& hist
             if (val < min)
             {
                 min = val;
-
                 Edge_HistogramElement[i] = j;
             }
         }

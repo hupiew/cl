@@ -1,5 +1,5 @@
-// ceddfuzzy24.cpp
-/* CL
+/** ceddfuzzy24.cpp
+   CL
    This file was originally written in Java as part of LIRE,
    and was adapted into C++ by Hupie.
 
