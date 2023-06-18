@@ -36,17 +36,18 @@
 
 class ColorLayoutExtractor : public Extractor
 {
-    std::array<std::array<int, 64>, 3> shapes;
     std::array<std::array<uint8_t, 64>, 3> coeffs;
-    unsigned int ycoeff_length{ 21 };
-    unsigned int ccoeff_length{ 6 };
+    unsigned int ycoeff_length{21};
+    unsigned int ccoeff_length{6};
 
-    static int quant_ac (int i) noexcept;
+    static int quant_ac(int i) noexcept;
     static int quant_cdc(int i) noexcept;
     static int quant_ydc(int i) noexcept;
 
-    void fdct(std::array<int, 64> &shape) noexcept;
-    void extract_shape(const QImage &image) noexcept;
+    using Shape = std::array<int, 64>;
+
+    void fdct(Shape &shape) noexcept;
+    std::array<Shape, 3> extract_shape(const QImage &image) noexcept;
 
 public:
     ColorLayoutExtractor();

@@ -126,15 +126,15 @@ constexpr uint8_t arrayZigZag[] ={
     53, 60, 61, 54, 47, 55, 62, 63
    };
 
-ColorLayoutExtractor::ColorLayoutExtractor() :
-    shapes(), coeffs()
+ColorLayoutExtractor::ColorLayoutExtractor()
+  : coeffs()
 {
 
 }
 
 void ColorLayoutExtractor::extract(const QImage& image) noexcept
 {
-    extract_shape(image);
+    auto shapes = extract_shape(image);
     for (auto& shape: shapes)
         fdct(shape);
 
@@ -243,10 +243,11 @@ void ColorLayoutExtractor::fdct(std::array<int, 64> &shape) noexcept
     }
 }
 
-void ColorLayoutExtractor::extract_shape(const QImage& image) noexcept
+std::array<ColorLayoutExtractor::Shape, 3> ColorLayoutExtractor::extract_shape(
+    const QImage& image) noexcept
 {
-    std::array<int, 64> cnt{};
-    std::array<std::array<int, 64>, 3> sum{};
+    std::array<int, 64> counts{};
+    std::array<std::array<int, 64>, 3> shapes{};
 
     for (int y = 0; y < image.height(); ++y)
     {
@@ -263,18 +264,19 @@ void ColorLayoutExtractor::extract_shape(const QImage& image) noexcept
             const int k = y_axis * 8 + x_axis;
 
             const double yy = (0.299 * red + 0.587 * green + 0.114 * blue) / 256.0;
-            sum[0][k] += static_cast<int>(219.0 * yy + 16.5);
-            sum[1][k] += static_cast<int>(224.0 * 0.564 * (blue / 256.0 - yy) + 128.5);
-            sum[2][k] += static_cast<int>(224.0 * 0.713 * (red  / 256.0 - yy) + 128.5);
-            ++cnt[k];
+            shapes[0][k] += static_cast<int>(219.0 * yy + 16.5);
+            shapes[1][k] += static_cast<int>(224.0 * 0.564 * (blue / 256.0 - yy) + 128.5);
+            shapes[2][k] += static_cast<int>(224.0 * 0.713 * (red  / 256.0 - yy) + 128.5);
+            ++counts[k];
         }
     }
 
-    for (int k = 0; k < 3; ++k)
+    for (auto& shape : shapes)
     {
-        for (int i = 0; i < 64; ++i)
+        for (size_t i = 0; i < shape.size(); ++i)
         {
-            shapes[k][i] = (cnt[i] != 0) ? (sum[k][i] / cnt[i]) : 0;
+            shape[i] = (counts[i] != 0) ? (shape[i] / counts[i]) : 0;
         }
     }
+    return shapes;
 }
