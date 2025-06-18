@@ -17,10 +17,11 @@
 
 #include <phash.h>
 
+#include <QImage>
+#include <array>
 #include <cmath>
 #include <stdexcept>
-
-#include <cedd.h>
+#include <util/containerutil.h>
 
 
 PHash::PHash()
@@ -42,7 +43,7 @@ void PHash::extract(const QImage& image)
     {
         for (int j = 0; j < 8; ++j)
         {
-            const auto index = CEDD::index_2d_arrayC(j, i, SIDE);
+            const auto index = ContainerUtil::index_2d(j, i, SIDE);
             sum += dct[index];
         }
     }
@@ -54,7 +55,7 @@ void PHash::extract(const QImage& image)
     {
         for (int j = 0; j < 8; ++j)
         {
-            const auto index = CEDD::index_2d_arrayC(j, i, SIDE);
+            const auto index = ContainerUtil::index_2d(j, i, SIDE);
 
             hash = hash << 1;
             if (dct[index] < mean) hash += 1;
@@ -92,7 +93,7 @@ std::vector<float> PHash::dct_cv(const QImage& image)
             const auto blue = qBlue(col);
             const auto gray = 0.114 * blue + 0.587 * green + 0.299 * red;
 
-            const auto index = CEDD::index_2d_arrayC(j, i, image.width());
+            const auto index = ContainerUtil::index_2d(j, i, image.width());
             output[index] = gray;
         }
     }
@@ -148,7 +149,7 @@ void PHash::dct_scale(std::vector<float>* input)
     {
         for (int j = 0; j < SIDE; ++j)
         {
-            const auto index = CEDD::index_2d_arrayC(j, i, SIDE);
+            const auto index = ContainerUtil::index_2d(j, i, SIDE);
             if (i == 0 && j == 0) continue;
             if (i == 0 || j == 0) (*input)[index] = (*input)[index] * fe;
             else

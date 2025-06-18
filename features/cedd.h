@@ -95,10 +95,4 @@ public:
     virtual std::vector<int8_t> get_descriptor() const override;
 
     const std::array<int8_t, 144>& get_data() const noexcept;
-
-    static size_t index_2d_arrayC(size_t x, size_t y, size_t width)
-    {
-        // C-style ordering
-        return y * width + x;
-    }
 };

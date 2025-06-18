@@ -31,11 +31,12 @@
 #include <cstdlib>
 
 // The CEDD fuzzy code is identical to the FCTH code.
-#include <cedd.h>
 #include <ceddfuzzy10.h>
 #include <ceddfuzzy24.h>
 #include <fcthquant.h>
+#include <features/cedd.h>
 #include <fuzzyfcth.h>
+#include <util/containerutil.h>
 
 
 FCTH::FCTH()
@@ -101,7 +102,7 @@ void FCTH::extract(const QImage &image)
                     const QRgb& rgb = line[x + i];
 
                     const auto block_index =
-                        CEDD::index_2d_arrayC(CurrentPixelX, CurrentPixelY, 4);
+                        ContainerUtil::index_2d(CurrentPixelX, CurrentPixelY, 4);
 
                     areas[block_index].add_color(rgb);
                     BlockCount[block_index]++;
@@ -223,13 +224,14 @@ WaveletMatrixPlus FCTH::singlePassThreshold(const std::array<double, 16>& inputM
             {
                 currentPixel++;
 
-                const auto index = CEDD::index_2d_arrayC(x, y, side_len);
+                const auto index = ContainerUtil::index_2d(x, y, side_len);
                 const auto xx = x * 2;
                 const auto yy = y * 2;
-                const auto index2x = CEDD::index_2d_arrayC(xx, yy, side_len);
-                const auto index_x1 = CEDD::index_2d_arrayC(xx + 1, yy, side_len);
-                const auto index_y1 = CEDD::index_2d_arrayC(xx, yy + 1, side_len);
-                const auto index_yx1 = CEDD::index_2d_arrayC(xx + 1, yy + 1, side_len);
+                const auto index2x = ContainerUtil::index_2d(xx, yy, side_len);
+                const auto index_x1 = ContainerUtil::index_2d(xx + 1, yy, side_len);
+                const auto index_y1 = ContainerUtil::index_2d(xx, yy + 1, side_len);
+                const auto index_yx1 =
+                    ContainerUtil::index_2d(xx + 1, yy + 1, side_len);
 
                 resultMatrix[index] = (inputMatrix[index2x] + inputMatrix[index_x1] +
                                        inputMatrix[index_y1] + inputMatrix[index_yx1]) /
@@ -244,13 +246,13 @@ WaveletMatrixPlus FCTH::singlePassThreshold(const std::array<double, 16>& inputM
                 double diagDiff = (-inputMatrix[index2x] + inputMatrix[index_x1] +
                                    inputMatrix[index_y1] - inputMatrix[index_yx1]);
 
-                resultMatrix[CEDD::index_2d_arrayC(x + xOffset, y, side_len)] =
+                resultMatrix[ContainerUtil::index_2d(x + xOffset, y, side_len)] =
                     static_cast<int8_t>(multiplier + std::abs(vertDiff));
 
-                resultMatrix[CEDD::index_2d_arrayC(x, y + yOffset, side_len)] =
+                resultMatrix[ContainerUtil::index_2d(x, y + yOffset, side_len)] =
                     static_cast<int8_t>(multiplier + std::abs(horzDiff));
 
-                resultMatrix[CEDD::index_2d_arrayC(
+                resultMatrix[ContainerUtil::index_2d(
                     x + xOffset, y + yOffset, side_len)] =
                     static_cast<int8_t>(multiplier + std::abs(diagDiff));
             }
@@ -258,7 +260,7 @@ WaveletMatrixPlus FCTH::singlePassThreshold(const std::array<double, 16>& inputM
             {
                 if ((x >= side_len / level) || (y >= side_len / level))
                 {
-                    const auto index = CEDD::index_2d_arrayC(x, y, side_len);
+                    const auto index = ContainerUtil::index_2d(x, y, side_len);
                     resultMatrix[index] = inputMatrix[index];
                 }
             }
@@ -275,13 +277,13 @@ WaveletMatrixPlus FCTH::singlePassThreshold(const std::array<double, 16>& inputM
         {
             Temp1 +=
                 0.25 *
-                std::pow(resultMatrix[CEDD::index_2d_arrayC(2 + i, j, side_len)], 2);
+                std::pow(resultMatrix[ContainerUtil::index_2d(2 + i, j, side_len)], 2);
             Temp2 +=
                 0.25 *
-                std::pow(resultMatrix[CEDD::index_2d_arrayC(i, 2 + j, side_len)], 2);
+                std::pow(resultMatrix[ContainerUtil::index_2d(i, 2 + j, side_len)], 2);
             Temp3 +=
                 0.25 *
-                std::pow(resultMatrix[CEDD::index_2d_arrayC(2 + i, 2 + j, side_len)],
+                std::pow(resultMatrix[ContainerUtil::index_2d(2 + i, 2 + j, side_len)],
                          2);
         }
     }

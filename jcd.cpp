@@ -30,8 +30,8 @@
 
 #include <QImage>
 
-#include <cedd.h>
 #include <fcth.h>
+#include <features/cedd.h>
 
 void JCD::joinHistograms(const CEDD& cedd, const FCTH& fcth)
 {
