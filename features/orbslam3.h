@@ -38,7 +38,10 @@ public:
 
     virtual void extract(const QImage& image) override;
 
-    virtual std::vector<int8_t> get_descriptor() const override { return { desc }; }
+    [[nodiscard]] virtual std::vector<int8_t> get_descriptor() const override
+    {
+        return { desc };
+    }
 
     virtual bool is_variable() const noexcept override { return false; }
 
@@ -46,7 +49,6 @@ public:
     // ORB are dispersed on the image using an octree.
     // Mask is ignored in the current implementation.
     int operator()(cv::InputArray _image,
-                   cv::InputArray _mask,
                    std::vector<cv::KeyPoint>& _keypoints,
                    cv::OutputArray _descriptors,
                    std::vector<int>& vLappingArea);
@@ -55,14 +57,17 @@ public:
 
 protected:
     void ComputePyramid(cv::Mat image);
-    void ComputeKeyPointsOctTree(std::vector<std::vector<cv::KeyPoint>>& allKeypoints);
+
+    void ComputeKeyPointsOctTree(
+        std::vector<std::vector<cv::KeyPoint>>& allKeypoints) const;
+
     std::vector<cv::KeyPoint> DistributeOctTree(
         const std::vector<cv::KeyPoint>& vToDistributeKeys,
         const int& minX,
         const int& maxX,
         const int& minY,
         const int& maxY,
-        const int& nFeatures);
+        const int& nFeatures) const;
 
     std::vector<cv::Mat> mvImagePyramid;
     std::vector<cv::Point> pattern;

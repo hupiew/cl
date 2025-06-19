@@ -550,14 +550,13 @@ void ORBSLAM3::extract(const QImage& image)
     cv::Mat image_mat{ image.height(), image.width(), CV_8UC1 };
     cv::cvtColor(mat, image_mat, cv::COLOR_RGB2GRAY);
 
-    auto empty_mat = cv::Mat{};
     auto kp = std::vector<cv::KeyPoint>();
     auto vlapping = std::vector<int>(2, 0);
 
     auto output_mat = cv::Mat{};
     auto output = cv::OutputArray{ output_mat };
 
-    (*this)(image_mat, empty_mat, kp, output, vlapping);
+    (*this)(image_mat, kp, output, vlapping);
 
     auto& desc_mat = output.getMatRef();
     auto o = std::vector<int8_t>(desc_mat.rows * desc_mat.cols);
@@ -579,7 +578,7 @@ vector<cv::KeyPoint> ORBSLAM3::DistributeOctTree(
     const int& maxX,
     const int& minY,
     const int& maxY,
-    const int& N)
+    const int& N) const
 {
     // Compute how many initial nodes
     const int nIni = round(static_cast<float>(maxX - minX) / (maxY - minY));
@@ -807,7 +806,7 @@ vector<cv::KeyPoint> ORBSLAM3::DistributeOctTree(
     return vResultKeys;
 }
 
-void ORBSLAM3::ComputeKeyPointsOctTree(vector<vector<KeyPoint>>& allKeypoints)
+void ORBSLAM3::ComputeKeyPointsOctTree(vector<vector<KeyPoint>>& allKeypoints) const
 {
     allKeypoints.resize(nlevels);
     // allKeypoints.resize(nfeatures * nlevels);
@@ -906,7 +905,6 @@ void ORBSLAM3::ComputeKeyPointsOctTree(vector<vector<KeyPoint>>& allKeypoints)
 }
 
 int ORBSLAM3::operator()(InputArray _image,
-                         InputArray _mask,
                          vector<KeyPoint>& _keypoints,
                          OutputArray _descriptors,
                          std::vector<int>& vLappingArea)
