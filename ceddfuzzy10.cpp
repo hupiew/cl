@@ -26,6 +26,7 @@
 
 #include <ceddfuzzy10.h>
 
+#include <vector>
 
 namespace {
 

@@ -43,7 +43,7 @@ void DHash::extract(const QImage& image)
     const auto resized =
         interm.scaled(9, 8, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
-    uint64_t hash{ 0 };
+    uint64_t dhash{ 0 };
     for (int i = 0; i < resized.height(); ++i)
     {
         const QRgb* line = reinterpret_cast<const QRgb*>(resized.scanLine(i));
@@ -59,12 +59,11 @@ void DHash::extract(const QImage& image)
 
             if (j != 0)
             {
-                hash = hash << 1;
-                hash += (last < gray);
+                dhash = dhash << 1;
+                dhash += (last < gray);
             }
             last = gray;
         }
     }
-
-    this->hash = hash;
+    hash = dhash;
 }

@@ -1,6 +1,6 @@
 QT += core gui multimedia
 
-CONFIG += c++2a console
+CONFIG += c++20 console
 CONFIG -= app_bundle
 
 INCLUDEPATH += $$PWD/flatbuffers/include
@@ -12,8 +12,22 @@ DEFINES += CL_USE_FFMPEG=1
 
 LIBS += -lavcodec -lavformat -lavutil -lswscale
 
+CONFIG(release, debug|release) {
+  message( "release" )
+  LIBS += -lopencv_world490
+}
+CONFIG(debug, debug|release) {
+  message( "debug" )
+  LIBS += -lopencv_world490d
+}
+
+# Default rules for deployment.
+qnx: target.path = /tmp/$${TARGET}/bin
+else: unix:!android: target.path = /opt/$${TARGET}/bin
+!isEmpty(target.path): INSTALLS += target
+
+
 SOURCES += \
-        cedd.cpp \
         ceddfuzzy10.cpp \
         ceddfuzzy24.cpp \
         ceddquant.cpp \
@@ -22,22 +36,19 @@ SOURCES += \
         extractor.cpp \
         fcth.cpp \
         fcthquant.cpp \
+        features/cedd.cpp \
+        features/orbslam3.cpp \
         fuzzyfcth.cpp \
         jcd.cpp \
         main.cpp \
         phash.cpp \
         util/BytesView.cpp \
         util/IscFileHelper.cpp \
+        util/containerutil.cpp \
         videoextractor.cpp \
         videoextractorffmpeg.cpp
 
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
-
 HEADERS += \
-    cedd.h \
     ceddfuzzy10.h \
     ceddfuzzy24.h \
     ceddquant.h \
@@ -46,10 +57,13 @@ HEADERS += \
     extractor.h \
     fcth.h \
     fcthquant.h \
+    features/cedd.h \
+    features/orbslam3.h \
     fuzzyfcth.h \
     jcd.h \
     phash.h \
     util/BytesView.hpp \
     util/IscFileHelper.hpp \
+    util/containerutil.h \
     videoextractor.h \
     videoextractorffmpeg.h

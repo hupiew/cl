@@ -126,7 +126,7 @@ void VideoExtractor::statusChanged(QMediaPlayer::MediaStatus status)
     }
 }
 
-void VideoExtractor::durationChanged(qint64 duration)
+void VideoExtractor::durationChanged(qint64 milliseconds)
 {
-    this->duration = duration / 1000;
+    this->duration = milliseconds / 1000;
 }

@@ -27,11 +27,12 @@
 #include <QImageReader>
 #include <QMimeDatabase>
 
-#include <cedd.h>
 #include <cl.h>
 #include <dhash.h>
 #include <extractor.h>
 #include <fcth.h>
+#include <features/cedd.h>
+#include <features/orbslam3.h>
 #include <jcd.h>
 #include <phash.h>
 #include <util/IscFileHelper.hpp>
@@ -144,6 +145,7 @@ int main(int argc, char* argv[])
         { 4, "cedd", std::make_unique<CEDD> },
         { 5, "fcth", std::make_unique<FCTH> },
         { 6, "jcd", std::make_unique<JCD> },
+        { 255, "orbslam", std::make_unique<ORBSLAM3> }, // TODO: give type id
     };
 
     std::unique_ptr<Extractor> extractor;

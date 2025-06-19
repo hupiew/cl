@@ -50,18 +50,18 @@ void PHash::extract(const QImage& image)
     sum -= dct[0];
     const auto mean = sum / 64; // 8*8
 
-    uint64_t hash = 0;
+    uint64_t phash = 0;
     for (int i = 0; i < 8; ++i)
     {
         for (int j = 0; j < 8; ++j)
         {
             const auto index = ContainerUtil::index_2d(j, i, SIDE);
 
-            hash = hash << 1;
-            if (dct[index] < mean) hash += 1;
+            phash = phash << 1;
+            if (dct[index] < mean) phash += 1;
         }
     }
-    this->hash = hash;
+    hash = phash;
 }
 
 std::vector<int8_t> PHash::get_descriptor() const

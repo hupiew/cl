@@ -51,7 +51,7 @@ public:
                    cv::OutputArray _descriptors,
                    std::vector<int>& vLappingArea);
 
-    std::vector<cv::Mat> mvImagePyramid;
+
 
 protected:
     void ComputePyramid(cv::Mat image);
@@ -64,15 +64,18 @@ protected:
         const int& maxY,
         const int& nFeatures);
 
+    std::vector<cv::Mat> mvImagePyramid;
     std::vector<cv::Point> pattern;
+    std::vector<int8_t> desc;
+    std::vector<int> umax;
+
+    float* level_data = nullptr;
+    double scaleFactor;
 
     int nfeatures;
-    double scaleFactor;
     int nlevels;
     int iniThFAST;
     int minThFAST;
-
-    std::vector<int> umax;
 
     float calc_scale_factor(int level) const;
     float get_scale_factor(int level) const;
@@ -85,10 +88,8 @@ protected:
     int calc_features(int level) const;
     int get_features(int level) const;
     void set_features(int level, int value);
-
-    float* level_data = nullptr;
-    std::vector<int8_t> desc;
 };
+
 
 /*
  * ORB-SLAM3 is free software: you can redistribute it and/or modify it under the terms
@@ -102,3 +103,18 @@ protected:
  * You should have received a copy of the GNU General Public License along with
  * ORB-SLAM3. If not, see <http://www.gnu.org/licenses/>.
  */
+/*
+   Copyright (C) 2025  Hupie (hupiew[at]gmail.com)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>. */

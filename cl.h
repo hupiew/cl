@@ -37,8 +37,8 @@
 class ColorLayoutExtractor : public Extractor
 {
     std::array<std::array<uint8_t, 64>, 3> coeffs;
-    unsigned int ycoeff_length{21};
-    unsigned int ccoeff_length{6};
+    unsigned int ycoeff_length{ 21 };
+    unsigned int ccoeff_length{ 6 };
 
     static int quant_ac(int i) noexcept;
     static int quant_cdc(int i) noexcept;
