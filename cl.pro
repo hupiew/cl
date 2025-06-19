@@ -28,20 +28,20 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 
 SOURCES += \
-        ceddfuzzy10.cpp \
-        ceddfuzzy24.cpp \
-        ceddquant.cpp \
-        cl.cpp \
-        dhash.cpp \
-        extractor.cpp \
-        fcth.cpp \
-        fcthquant.cpp \
         features/cedd.cpp \
+        features/cl.cpp \
+        features/dhash.cpp \
+        features/extractor.cpp \
+        features/fcth.cpp \
+        features/jcd.cpp \
         features/orbslam3.cpp \
-        fuzzyfcth.cpp \
-        jcd.cpp \
+        features/phash.cpp \
+        features/util/ceddfuzzy10.cpp \
+        features/util/ceddfuzzy24.cpp \
+        features/util/ceddquant.cpp \
+        features/util/fcthquant.cpp \
+        features/util/fuzzyfcth.cpp \
         main.cpp \
-        phash.cpp \
         util/BytesView.cpp \
         util/IscFileHelper.cpp \
         util/containerutil.cpp \
@@ -49,19 +49,19 @@ SOURCES += \
         videoextractorffmpeg.cpp
 
 HEADERS += \
-    ceddfuzzy10.h \
-    ceddfuzzy24.h \
-    ceddquant.h \
-    cl.h \
-    dhash.h \
-    extractor.h \
-    fcth.h \
-    fcthquant.h \
     features/cedd.h \
+    features/cl.h \
+    features/dhash.h \
+    features/extractor.h \
+    features/fcth.h \
+    features/jcd.h \
     features/orbslam3.h \
-    fuzzyfcth.h \
-    jcd.h \
-    phash.h \
+    features/phash.h \
+    features/util/ceddfuzzy10.h \
+    features/util/ceddfuzzy24.h \
+    features/util/ceddquant.h \
+    features/util/fcthquant.h \
+    features/util/fuzzyfcth.h \
     util/BytesView.hpp \
     util/IscFileHelper.hpp \
     util/containerutil.h \

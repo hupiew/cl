@@ -27,14 +27,14 @@
 #include <QImageReader>
 #include <QMimeDatabase>
 
-#include <cl.h>
-#include <dhash.h>
-#include <extractor.h>
-#include <fcth.h>
 #include <features/cedd.h>
+#include <features/cl.h>
+#include <features/dhash.h>
+#include <features/extractor.h>
+#include <features/fcth.h>
+#include <features/jcd.h>
 #include <features/orbslam3.h>
-#include <jcd.h>
-#include <phash.h>
+#include <features/phash.h>
 #include <util/IscFileHelper.hpp>
 #include <videoextractor.h>
 #include <videoextractorffmpeg.h>

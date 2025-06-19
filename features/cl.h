@@ -1,4 +1,4 @@
-/** jcd.h
+/** cl.h (ColorLayout)
    CL
    This file was originally written in Java as part of LIRE,
    and was adapted into C++ by Hupie.
@@ -27,28 +27,36 @@
 #pragma once
 
 #include <array>
+#include <vector>
 
 #include <QImage>
 
-#include <extractor.h>
-
-class CEDD;
-class FCTH;
+#include <features/extractor.h>
 
 
-
-class JCD : public Extractor
+class ColorLayoutExtractor : public Extractor
 {
-    std::array<double, 168> data;
+    std::array<std::array<uint8_t, 64>, 3> coeffs;
+    unsigned int ycoeff_length{ 21 };
+    unsigned int ccoeff_length{ 6 };
 
-    void joinHistograms(const CEDD& cedd, const FCTH& fcth);
+    static int quant_ac(int i) noexcept;
+    static int quant_cdc(int i) noexcept;
+    static int quant_ydc(int i) noexcept;
+
+    using Shape = std::array<int, 64>;
+
+    void fdct(Shape &shape) noexcept;
+    std::array<Shape, 3> extract_shape(const QImage &image) noexcept;
 
 public:
-    JCD(const CEDD& cedd, const FCTH& fcth);
+    ColorLayoutExtractor();
 
-    JCD();
-
-    virtual void extract(const QImage& image) override;
+    virtual void extract(const QImage& image) noexcept override;
 
     [[nodiscard]] virtual std::vector<int8_t> get_descriptor() const override;
+
+    virtual bool is_variable() const noexcept override { return false; }
+
+    void set_coeffs(unsigned int ycoeffs, unsigned int ccoeffs);
 };

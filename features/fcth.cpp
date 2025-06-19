@@ -24,18 +24,18 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 
-#include <fcth.h>
+#include <features/fcth.h>
 
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 
 // The CEDD fuzzy code is identical to the FCTH code.
-#include <ceddfuzzy10.h>
-#include <ceddfuzzy24.h>
-#include <fcthquant.h>
 #include <features/cedd.h>
-#include <fuzzyfcth.h>
+#include <features/util/ceddfuzzy10.h>
+#include <features/util/ceddfuzzy24.h>
+#include <features/util/fcthquant.h>
+#include <features/util/fuzzyfcth.h>
 #include <util/containerutil.h>
 
 

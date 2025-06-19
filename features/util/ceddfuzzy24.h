@@ -28,7 +28,7 @@
 
 #include <cstdint>
 
-#include <ceddfuzzy10.h>
+#include <features/util/ceddfuzzy10.h>
 
 class CeddFuzzy24
 {

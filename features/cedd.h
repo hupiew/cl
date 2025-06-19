@@ -30,7 +30,7 @@
 
 #include <QImage>
 
-#include <extractor.h>
+#include <features/extractor.h>
 
 
 struct Neighborhood

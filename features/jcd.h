@@ -1,4 +1,4 @@
-/** fuzzyfcth.h
+/** jcd.h
    CL
    This file was originally written in Java as part of LIRE,
    and was adapted into C++ by Hupie.
@@ -28,31 +28,27 @@
 
 #include <array>
 
-#include <ceddfuzzy10.h>
+#include <QImage>
 
-struct WaveletMatrixPlus;
+#include <features/extractor.h>
 
-class FuzzyFcth
+class CEDD;
+class FCTH;
+
+
+
+class JCD : public Extractor
 {
-    // Only 8 are used, but it's 10 so it works with CeddFuzzy10 code
-    std::array<double, 10> resultsTable;
+    std::array<double, 168> data;
 
-
-    static constexpr uint16_t HMemberValues[] = { 0, 0, 20, 90, 20, 90, 255, 255 };
-    static constexpr uint16_t VMemberValues[] = { 0, 0, 20, 90, 20, 90, 255, 255 };
-    static constexpr uint16_t EMemberValues[] = { 0, 0, 20, 80, 20, 80, 255, 255 };
-
-    static constexpr int rules_length = 8;
-    static constexpr FuzzyRules FcthRules[rules_length] = {
-        { 0, 0, 0, 0 }, { 0, 0, 1, 1 }, { 0, 1, 0, 2 }, { 0, 1, 1, 3 },
-        { 1, 0, 0, 4 }, { 1, 0, 1, 5 }, { 1, 1, 0, 6 }, { 1, 1, 1, 7 }
-    };
+    void joinHistograms(const CEDD& cedd, const FCTH& fcth);
 
 public:
-    FuzzyFcth();
+    JCD(const CEDD& cedd, const FCTH& fcth);
 
-    void apply_filter(const WaveletMatrixPlus& matrix,
-                      const std::vector<double>& colors,
-                      int method,
-                      std::array<double, 192>* output);
+    JCD();
+
+    virtual void extract(const QImage& image) override;
+
+    [[nodiscard]] virtual std::vector<int8_t> get_descriptor() const override;
 };

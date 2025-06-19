@@ -1,4 +1,4 @@
-/** dhash.h
+/** phash.h
    CL
    Copyright (C) 2022  Hupie (hupiew[at]gmail.com)
 
@@ -17,13 +17,29 @@
 
 #pragma once
 
-#include <phash.h>
+#include <cstdint>
+
+#include <features/extractor.h>
 
 
-class DHash : public PHash
+class PHash : public Extractor
 {
 public:
-    DHash();
+    PHash();
+    // Length of a side of our square image
+    static constexpr int SIDE = 32;
 
     virtual void extract(const QImage& image) override;
+
+    virtual std::vector<int8_t> get_descriptor() const override;
+
+    virtual bool is_variable() const noexcept override { return false; }
+
+private:
+    static std::vector<float> dct_cv(const QImage& image);
+    static void dct_step(std::vector<float>* input, int start, int step);
+    static void dct_scale(std::vector<float>* input);
+
+protected:
+    uint64_t hash;
 };

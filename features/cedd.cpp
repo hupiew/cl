@@ -32,9 +32,9 @@
 #include <cstdlib>
 #include <iostream>
 
-#include <ceddfuzzy10.h>
-#include <ceddfuzzy24.h>
-#include <ceddquant.h>
+#include <features/util/ceddfuzzy10.h>
+#include <features/util/ceddfuzzy24.h>
+#include <features/util/ceddquant.h>
 
 
 CEDD::CEDD() : compact(false)

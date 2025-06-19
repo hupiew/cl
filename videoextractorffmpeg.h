@@ -33,7 +33,7 @@ extern "C"
     struct AVBufferRef;
 }
 
-#include <extractor.h>
+#include <features/extractor.h>
 
 namespace imsearch {
 struct IscIndexHelper;

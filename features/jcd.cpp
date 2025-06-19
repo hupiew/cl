@@ -24,14 +24,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 
-#include <jcd.h>
+#include <features/jcd.h>
 
 #include <limits>
 
 #include <QImage>
 
-#include <fcth.h>
 #include <features/cedd.h>
+#include <features/fcth.h>
 
 void JCD::joinHistograms(const CEDD& cedd, const FCTH& fcth)
 {

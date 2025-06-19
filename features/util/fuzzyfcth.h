@@ -1,4 +1,4 @@
-/** fcth.h
+/** fuzzyfcth.h
    CL
    This file was originally written in Java as part of LIRE,
    and was adapted into C++ by Hupie.
@@ -28,33 +28,31 @@
 
 #include <array>
 
-#include <QImage>
+#include <features/util/ceddfuzzy10.h>
 
-#include <extractor.h>
+struct WaveletMatrixPlus;
 
-
-struct WaveletMatrixPlus
+class FuzzyFcth
 {
-    double F1;
-    double F2;
-    double F3;
-    double Entropy;
-};
+    // Only 8 are used, but it's 10 so it works with CeddFuzzy10 code
+    std::array<double, 10> resultsTable;
 
-class FCTH : public Extractor
-{
-    std::array<double, 192> histogram;
-    bool compact;
 
-    WaveletMatrixPlus singlePassThreshold(const std::array<double, 16>& inputMatrix,
-                                          int level) const noexcept;
+    static constexpr uint16_t HMemberValues[] = { 0, 0, 20, 90, 20, 90, 255, 255 };
+    static constexpr uint16_t VMemberValues[] = { 0, 0, 20, 90, 20, 90, 255, 255 };
+    static constexpr uint16_t EMemberValues[] = { 0, 0, 20, 80, 20, 80, 255, 255 };
+
+    static constexpr int rules_length = 8;
+    static constexpr FuzzyRules FcthRules[rules_length] = {
+        { 0, 0, 0, 0 }, { 0, 0, 1, 1 }, { 0, 1, 0, 2 }, { 0, 1, 1, 3 },
+        { 1, 0, 0, 4 }, { 1, 0, 1, 5 }, { 1, 1, 0, 6 }, { 1, 1, 1, 7 }
+    };
 
 public:
-    FCTH();
+    FuzzyFcth();
 
-    virtual void extract(const QImage& image) override;
-
-    [[nodiscard]] virtual std::vector<int8_t> get_descriptor() const override;
-
-    const std::array<double, 192>& get_data() const noexcept;
+    void apply_filter(const WaveletMatrixPlus& matrix,
+                      const std::vector<double>& colors,
+                      int method,
+                      std::array<double, 192>* output);
 };
